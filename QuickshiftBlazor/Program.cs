@@ -1,6 +1,9 @@
 using quickshift_frontend_blazor.Components;
+using QuickshiftBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IShiftService, HttpShiftService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

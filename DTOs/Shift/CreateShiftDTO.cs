@@ -1,6 +1,6 @@
 ﻿namespace DTOs.Shift;
 
-public class ShiftDTO
+public class CreateShiftDTO
 {
     public DateTime StartDateTime { get; set; }
     public DateTime EndDateTime { get; set; }
@@ -8,6 +8,4 @@ public class ShiftDTO
     public string ShiftStatus { get; set; }
     public string Description { get; set; }
     public string Location { get; set; }
-    public long Id { get; set; }
-    public int WorkingNumber { get; set; }
 }
