@@ -1,0 +1,41 @@
+﻿@page "/MyShifts"
+@rendermode InteractiveServer
+@using DTOs.Shift
+@using QuickshiftBlazor.Services
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+
+
+<h3>My Shifts</h3>
+
+@if (shifts == null)
+{
+<p class="mt-4">
+    <em>Loading...</em>
+</p>
+}
+else if (!shifts.Any())
+{
+<p class="mt-4">No shifts available.</p>
+}
+else
+{
+<ul class="list-group mt-4">
+    @foreach (var ShiftDTO in shifts)
+    {
+    <li class="list-group-item">
+        <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
+    </li>
+    }
+</ul>
+}
+
+@code {
+    private IEnumerable<ShiftDTO> shifts;
+    
+    private void RedirectToShift(int Id)
+    {
+        Console.WriteLine(Id);
+        Navigation.NavigateTo($"/MyShifts/{Id}");
+    }
+}
