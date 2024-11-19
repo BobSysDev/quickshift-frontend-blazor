@@ -33,7 +33,7 @@ else
 @code {
     private IEnumerable<ShiftDTO> shifts;
     
-    private void RedirectToShift(int Id)
+    private void RedirectToShift(long Id)
     {
         Console.WriteLine(Id);
         Navigation.NavigateTo($"/MyShifts/{Id}");
