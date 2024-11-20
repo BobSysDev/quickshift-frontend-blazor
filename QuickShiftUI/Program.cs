@@ -1,13 +1,19 @@
-using quickshift_frontend_blazor.Components;
-using QuickshiftBlazor.Services;
+using QuickShiftUI.Components;
+using QuickShiftUI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddScoped<IShiftService, HttpShiftService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<IShiftService, HttpShiftService>();
+
+builder.Services.AddScoped(sp => new HttpClient
+{
+    // BaseAddress = new Uri("https://quickshift.electimore.xyz")
+    BaseAddress = new Uri("http://localhost:5070")
+});
 
 var app = builder.Build();
 

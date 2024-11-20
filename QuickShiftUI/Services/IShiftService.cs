@@ -1,6 +1,6 @@
 ﻿using DTOs.Shift;
 
-namespace QuickshiftBlazor.Services;
+namespace QuickShiftUI.Services;
 
 public interface IShiftService
 {
