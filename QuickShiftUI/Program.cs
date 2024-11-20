@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using QuickShiftUI.Components;
+using QuickShiftUI.Components.Auth;
 using QuickShiftUI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +10,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddScoped<IShiftService, HttpShiftService>();
+builder.Services.AddScoped<AuthenticationStateProvider, SimpleAuthProvider>();
 
 builder.Services.AddScoped(sp => new HttpClient
 {

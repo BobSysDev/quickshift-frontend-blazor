@@ -1,41 +1,76 @@
 ﻿@page "/MyShifts"
 @using DTOs.Shift
+@using Microsoft.AspNetCore.Components.Authorization
 @using QuickShiftUI.Services
 @rendermode InteractiveServer
 @inject IShiftService ShiftService
 @inject NavigationManager Navigation
-
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthProvider
 
 <h3>My Shifts</h3>
 
-@if (shifts == null)
-{
-<p class="mt-4">
-    <em>Loading...</em>
-</p>
-}
-else if (!shifts.Any())
-{
-<p class="mt-4">No shifts available.</p>
-}
-else
-{
-<ul class="list-group mt-4">
-    @foreach (var ShiftDTO in shifts)
-    {
-    <li class="list-group-item">
-        <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
-    </li>
-    }
-</ul>
-}
+<AuthorizeView>
+    <NotAuthorized>
+        <p>Please log in to view your shifts</p>
+    </NotAuthorized>
+    
+    <Authorized Context="authorizedUser">
+        @if (shifts == null)
+        {
+            <p class="mt-4">
+                <em>Loading...</em>
+            </p>
+        }
+        else if (!shifts.Any())
+        {
+            <p class="mt-4">No shifts available.</p>
+        }
+        else
+        {
+            <ul class="list-group mt-4">
+                @foreach (var ShiftDTO in shifts)
+                {
+                    <li class="list-group-item">
+                        <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
+                    </li>
+                }
+            </ul>
+        }
+    </Authorized>
+</AuthorizeView>
 
 @code {
     private IEnumerable<ShiftDTO> shifts;
-    
+
     private void RedirectToShift(long Id)
     {
         Console.WriteLine(Id);
         Navigation.NavigateTo($"/MyShifts/{Id}");
     }
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        shifts = await ShiftService.GetAllShiftsAsync();
+        await RefreshAuthCredentials();
+    }
+
+    private async Task RefreshAuthCredentials()
+    {
+        AuthenticationState authenticationState = await State;
+        ClaimsPrincipal claimsPrincipal = authenticationState.User;
+        if (claimsPrincipal.Identity is null || !claimsPrincipal.Identity.IsAuthenticated)
+        {
+            return;
+        }
+
+        IEnumerable<Claim> claims = claimsPrincipal.Claims;
+        string userIdAsString = claims.Single(c => c.Type == ClaimTypes.NameIdentifier).Value;
+        loggedInUserId = int.Parse(userIdAsString);
+    }
+
 }
