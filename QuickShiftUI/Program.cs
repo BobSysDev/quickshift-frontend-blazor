@@ -14,7 +14,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, SimpleAuthProvider>();
 builder.Services.AddScoped<SimpleAuthProvider>(); 
 
 builder.Services.AddScoped(sp => new HttpClient
-{
+{ 
     // BaseAddress = new Uri("https://quickshift.electimore.xyz")
     BaseAddress = new Uri("http://localhost:5070")
 });

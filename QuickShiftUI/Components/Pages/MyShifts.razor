@@ -14,7 +14,7 @@
     <NotAuthorized>
         <p>Please log in to view your shifts</p>
     </NotAuthorized>
-    
+
     <Authorized Context="authorizedUser">
         @if (shifts == null)
         {
@@ -55,22 +55,17 @@
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthProvider.GetAuthenticationStateAsync();
-        shifts = await ShiftService.GetAllShiftsAsync();
-        await RefreshAuthCredentials();
-    }
+        var user = authState.User;
 
-    private async Task RefreshAuthCredentials()
-    {
-        AuthenticationState authenticationState = await State;
-        ClaimsPrincipal claimsPrincipal = authenticationState.User;
-        if (claimsPrincipal.Identity is null || !claimsPrincipal.Identity.IsAuthenticated)
+        if (user.Identity.IsAuthenticated)
         {
-            return;
+            var userIdClaim = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+                var allShifts = await ShiftService.GetAllShiftsAsync();
+                shifts = allShifts.Where(shift => shift.Id == loggedInUserId); 
+            }
         }
-
-        IEnumerable<Claim> claims = claimsPrincipal.Claims;
-        string userIdAsString = claims.Single(c => c.Type == ClaimTypes.NameIdentifier).Value;
-        loggedInUserId = int.Parse(userIdAsString);
     }
-
 }
