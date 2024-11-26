@@ -1,0 +1,52 @@
+﻿@page "/login"
+@using QuickShiftUI.Components.Auth
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager navMgr
+
+<h3>This is where you login</h3>
+
+<h3>Login</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <h3>Please login</h3>
+        <label>Working Number:</label>
+        <input type="number" @bind="workingNumber"/>
+        <label>Password:</label>
+        <input type="password" @bind="password"/>
+        @if (!string.IsNullOrEmpty(errorLabel))
+        {
+            <label style="color: red"> @errorLabel </label>
+        }
+        <button @onclick="LoginAsync">Log in</button>
+    </NotAuthorized>
+    <Authorized>
+        <h3>Hello, @context.User.Identity.Name</h3>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private string workingNumber;
+    private string password;
+    private string errorLabel;
+
+    private async Task LoginAsync()
+    {
+        if (string.IsNullOrEmpty(workingNumber) || string.IsNullOrEmpty(password))
+        {
+            errorLabel = "Working Number and Password are required.";
+            return;
+        }
+        
+        try
+        {
+            int workingNumberInt = int.Parse(workingNumber);
+            await ((SimpleAuthProvider)AuthProvider).Login(workingNumberInt, password);
+            navMgr.NavigateTo("/");
+        }
+        catch (Exception e)
+        {
+            errorLabel = $"Error: {e.Message}";
+        }}
+    }
+}

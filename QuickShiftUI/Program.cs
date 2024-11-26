@@ -11,6 +11,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<IShiftService, HttpShiftService>();
 builder.Services.AddScoped<AuthenticationStateProvider, SimpleAuthProvider>();
+builder.Services.AddScoped<SimpleAuthProvider>(); 
 
 builder.Services.AddScoped(sp => new HttpClient
 {

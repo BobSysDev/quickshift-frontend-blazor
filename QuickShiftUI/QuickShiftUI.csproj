@@ -10,4 +10,8 @@
       <ProjectReference Include="..\DTOs\DTOs.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.7.0" />
+    </ItemGroup>
+
 </Project>

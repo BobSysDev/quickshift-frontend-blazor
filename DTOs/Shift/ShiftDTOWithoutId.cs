@@ -1,6 +1,6 @@
-namespace DTOs.Shift;
+﻿namespace DTOs.Shift;
 
-public class CreateShiftDTO
+public class ShiftDTOWithoutId
 {
     public DateTime StartDateTime { get; set; }
     public DateTime EndDateTime { get; set; }

@@ -1,0 +1,48 @@
+﻿@page "/createAccount"
+@using DTOs
+@using QuickShiftUI.Components.Auth
+@inject SimpleAuthProvider AuthProvider
+
+<h3>Create Account</h3>
+
+<EditForm Model="newEmployee" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>First Name:</label>
+        <InputText @bind-Value="newEmployee.FirstName" />
+    </div>
+    <div>
+        <label>Last Name:</label>
+        <InputText @bind-Value="newEmployee.LastName" />
+    </div>
+    <div>
+        <label>Working Number:</label>
+        <InputNumber @bind-Value="newEmployee.WorkingNumber" />
+    </div>
+    <div>
+        <label>Email:</label>
+        <InputText @bind-Value="newEmployee.Email" />
+    </div>
+    <div>
+        <label>Password:</label>
+        <InputText type="password" @bind-Value="newEmployee.Password" />
+    </div>
+    <button type="submit">Register</button>
+</EditForm>
+
+@code {
+    private NewEmployeeDTO newEmployee = new NewEmployeeDTO();
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await AuthProvider.Register(newEmployee.FirstName, newEmployee.LastName, newEmployee.WorkingNumber, newEmployee.Email, newEmployee.Password);
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+}
