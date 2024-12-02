@@ -70,22 +70,24 @@ public class SimpleAuthProvider : AuthenticationStateProvider
             throw new Exception(content);
         }
 
-        PublicEmployeeDTO? publicEmployeeDto = JsonSerializer.Deserialize<PublicEmployeeDTO>(content, new JsonSerializerOptions
+        SimpleEmployeeDTO? simpleEmployeeDto = JsonSerializer.Deserialize<SimpleEmployeeDTO>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
-        if (publicEmployeeDto is null)
+        if (simpleEmployeeDto is null)
         {
             throw new Exception("DTO returned was null");
         }
 
-        string serializedData = JsonSerializer.Serialize(publicEmployeeDto);
+        string serializedData = JsonSerializer.Serialize(simpleEmployeeDto);
         await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serializedData);
 
         List<Claim> claims = new List<Claim>()
         {
-            new Claim(ClaimTypes.Name, publicEmployeeDto.FirstName),
-            new Claim(ClaimTypes.NameIdentifier, publicEmployeeDto.WorkingNumber.ToString())
+            new Claim(ClaimTypes.Name, simpleEmployeeDto.FirstName),
+            new Claim(ClaimTypes.NameIdentifier, simpleEmployeeDto.WorkingNumber.ToString()),
+            new Claim(ClaimTypes.Surname, simpleEmployeeDto.LastName),
+            new Claim("EmployeeId", simpleEmployeeDto.Id.ToString())
         };
 
         ClaimsIdentity identity = new ClaimsIdentity(claims, "apiauth");
@@ -102,22 +104,24 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         {
             throw new Exception(content);
         }
-        PublicEmployeeDTO? publicEmployeeDto = JsonSerializer.Deserialize<PublicEmployeeDTO>(content, new JsonSerializerOptions
+        SimpleEmployeeDTO? simpleEmployeeDto = JsonSerializer.Deserialize<SimpleEmployeeDTO>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         });
-        if (publicEmployeeDto is null)
+        if (simpleEmployeeDto is null)
         {
             throw new Exception("DTO returned was null");
         }
 
-        string serializedData = JsonSerializer.Serialize(publicEmployeeDto);
+        string serializedData = JsonSerializer.Serialize(simpleEmployeeDto);
         await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serializedData);
 
         List<Claim> claims = new List<Claim>()
         {
-            new Claim(ClaimTypes.Name, publicEmployeeDto.FirstName),
-            new Claim(ClaimTypes.NameIdentifier, publicEmployeeDto.WorkingNumber.ToString())
+            new Claim(ClaimTypes.Name, simpleEmployeeDto.FirstName),
+            new Claim(ClaimTypes.NameIdentifier, simpleEmployeeDto.WorkingNumber.ToString()),
+            new Claim(ClaimTypes.Surname, simpleEmployeeDto.LastName),
+            new Claim("EmployeeId", simpleEmployeeDto.Id.ToString())
         };
         
         ClaimsIdentity identity = new ClaimsIdentity(claims, "apiauth");

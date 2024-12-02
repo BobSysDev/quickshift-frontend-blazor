@@ -41,7 +41,7 @@
 </AuthorizeView>
 
 @code {
-    private IEnumerable<ShiftDTO> shifts;
+    private List<ShiftDTO> shifts;
 
     private void RedirectToShift(long Id)
     {
@@ -59,12 +59,14 @@
 
         if (user.Identity.IsAuthenticated)
         {
-            var userIdClaim = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
             if (int.TryParse(userIdClaim, out int userId))
             {
                 loggedInUserId = userId;
-                var allShifts = await ShiftService.GetAllShiftsAsync();
-                shifts = allShifts.Where(shift => shift.Id == loggedInUserId); 
+                shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
+                Console.WriteLine(shifts.Any());
+                Console.WriteLine(userId);
+                StateHasChanged();
             }
         }
     }

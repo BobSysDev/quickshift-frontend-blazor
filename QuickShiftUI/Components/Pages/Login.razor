@@ -1,4 +1,5 @@
 ﻿@page "/login"
+@using DTOs
 @using QuickShiftUI.Components.Auth
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager navMgr
@@ -8,45 +9,59 @@
 <h3>Login</h3>
 
 <AuthorizeView>
-    <NotAuthorized>
-        <h3>Please login</h3>
-        <label>Working Number:</label>
-        <input type="number" @bind="workingNumber"/>
-        <label>Password:</label>
-        <input type="password" @bind="password"/>
+    <NotAuthorized Context="notAuthContext">
+        <EditForm Model="authEmployee" OnValidSubmit="LoginAsync">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            
+            <div>
+                <label>Working Number:</label>
+                <InputNumber @bind-Value="authEmployee.WorkingNumber"/>
+            </div>
+            <div>
+                <label>Password:</label>
+                <InputText @bind-Value="authEmployee.Password"/>
+            </div>
+        
+            <button type="submit">Login</button>
+        </EditForm>
+
         @if (!string.IsNullOrEmpty(errorLabel))
         {
             <label style="color: red"> @errorLabel </label>
         }
-        <button @onclick="LoginAsync">Log in</button>
     </NotAuthorized>
+    
     <Authorized>
         <h3>Hello, @context.User.Identity.Name</h3>
     </Authorized>
+    
 </AuthorizeView>
 
 @code {
-    private string workingNumber;
-    private string password;
+
     private string errorLabel;
+
+    private AuthEmployeeDTO authEmployee = new AuthEmployeeDTO();
 
     private async Task LoginAsync()
     {
-        if (string.IsNullOrEmpty(workingNumber) || string.IsNullOrEmpty(password))
+        Console.WriteLine(authEmployee.WorkingNumber + authEmployee.Password);
+        if (authEmployee.WorkingNumber == 0 || string.IsNullOrEmpty(authEmployee.Password))
         {
             errorLabel = "Working Number and Password are required.";
             return;
         }
-        
+
         try
         {
-            int workingNumberInt = int.Parse(workingNumber);
-            await ((SimpleAuthProvider)AuthProvider).Login(workingNumberInt, password);
+            await ((SimpleAuthProvider)AuthProvider).Login(authEmployee.WorkingNumber, authEmployee.Password);
             navMgr.NavigateTo("/");
         }
         catch (Exception e)
         {
             errorLabel = $"Error: {e.Message}";
-        }}
+        }
     }
+
 }

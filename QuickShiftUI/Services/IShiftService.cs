@@ -9,4 +9,6 @@ public interface IShiftService
     Task AddShiftAsync(CreateShiftDTO shiftDto);
     Task<ShiftDTO> UpdateShiftAsync(long Id, CreateShiftDTO shiftDto);
     Task DeleteShiftAsync(long Id);
+    
+    Task<List<ShiftDTO>> GetAllShiftsByUserIdAsync(long userId);
 }
