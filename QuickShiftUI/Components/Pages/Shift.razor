@@ -6,7 +6,7 @@
 @inject AuthenticationStateProvider AuthProvider
 
 
-<h3>Shift</h3>
+<h3>Shift details</h3>
 
 <AuthorizeView>
 
@@ -20,10 +20,9 @@
 
                 <div class="card-body">
                     <p>
-                        <b>Time: </b>
-                        <span>@displayedShift.StartDateTime</span>
-                        <span> - </span>
-                        <span>@displayedShift.EndDateTime</span>
+                        <b>Start time: </b><span>@displayedShift.StartDateTime</span>
+                        <br/>
+                        <b>End time: </b><span>@displayedShift.EndDateTime</span>
                     </p>
 
                     <p><b>Location: </b> <span>@displayedShift.Location</span></p>
@@ -32,7 +31,7 @@
                     <p><b>Status: </b> <span>@displayedShift.ShiftStatus</span> </p>
 
                     <p>
-                        <b>Shift Description:</b>
+                        <b>Shift description:</b>
                         <br>
                         <span>@displayedShift.Description</span>
                     </p>
