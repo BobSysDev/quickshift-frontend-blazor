@@ -65,7 +65,7 @@
                 loggedInUserId = userId;
                 shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
                 Console.WriteLine(shifts.Any());
-                Console.WriteLine(userId);
+                Console.WriteLine(userId);  
                 StateHasChanged();
             }
         }
