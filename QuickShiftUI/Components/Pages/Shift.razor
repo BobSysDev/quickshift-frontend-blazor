@@ -9,6 +9,7 @@
 <h3>Shift details</h3>
 
 <AuthorizeView>
+    <NotAuthorized> </NotAuthorized>
 
     <Authorized>
         @if (displayedShift != null)
@@ -25,10 +26,14 @@
                         <b>End time: </b><span>@displayedShift.EndDateTime</span>
                     </p>
 
-                    <p><b>Location: </b> <span>@displayedShift.Location</span></p>
- 
+                    <p>
+                        <b>Location: </b> <span>@displayedShift.Location</span>
+                    </p>
 
-                    <p><b>Status: </b> <span>@displayedShift.ShiftStatus</span> </p>
+
+                    <p>
+                        <b>Status: </b> <span>@displayedShift.ShiftStatus</span>
+                    </p>
 
                     <p>
                         <b>Shift description:</b>
@@ -41,7 +46,6 @@
         }
     </Authorized>
 
-    <NotAuthorized> Log in to see the shift! </NotAuthorized>
 
 </AuthorizeView>
 
@@ -61,6 +65,16 @@
             displayedShift = await ShiftService.GetShiftByIdAsync(Id);
         }
         catch
+        {
+            Navigation.NavigateTo("/MyShifts");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var user = (await AuthProvider.GetAuthenticationStateAsync()).User;
+        if (!user.Identity.IsAuthenticated)
         {
             Navigation.NavigateTo("/MyShifts");
         }
