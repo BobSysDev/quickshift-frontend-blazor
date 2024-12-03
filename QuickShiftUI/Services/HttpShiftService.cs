@@ -22,12 +22,12 @@ public class HttpShiftService : IShiftService
         return await _httpClient.GetFromJsonAsync<IEnumerable<ShiftDTO>>($"Shift");
     }
     
-    public async Task AddShiftAsync(CreateShiftDTO shiftDto)
+    public async Task AddShiftAsync(NewShiftDTO shiftDto)
     {
         await _httpClient.PostAsJsonAsync("Shift", shiftDto);
     }
 
-    public async Task<ShiftDTO> UpdateShiftAsync(long Id, CreateShiftDTO shiftDto)
+    public async Task<ShiftDTO> UpdateShiftAsync(long Id, NewShiftDTO shiftDto)
     {
         HttpResponseMessage response = await _httpClient.PatchAsJsonAsync($"Shift/{Id}", shiftDto);
         ShiftDTO responseDTO = JsonSerializer.Deserialize<ShiftDTO>(await response.Content.ReadAsStringAsync());
