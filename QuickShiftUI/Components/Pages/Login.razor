@@ -4,8 +4,6 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager navMgr
 
-<h3>This is where you login</h3>
-
 <h3>Login</h3>
 
 <AuthorizeView>
@@ -14,16 +12,16 @@
             <DataAnnotationsValidator/>
             <ValidationSummary/>
             
-            <div>
+            <div class="mt-4">
                 <label>Working Number:</label>
                 <InputNumber @bind-Value="authEmployee.WorkingNumber"/>
             </div>
-            <div>
+            <div class="mt-4">
                 <label>Password:</label>
                 <InputText @bind-Value="authEmployee.Password"/>
             </div>
         
-            <button type="submit">Login</button>
+            <button class="mt-4" type="submit">Login</button>
         </EditForm>
 
         @if (!string.IsNullOrEmpty(errorLabel))
