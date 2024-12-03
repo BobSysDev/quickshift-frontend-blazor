@@ -1,0 +1,11 @@
+﻿@page "/"
+@inject NavigationManager NavMgr 
+
+<PageTitle>Home</PageTitle>
+<h1>QuickShift</h1>
+<AuthorizeView>
+    <Authorized>
+        <h3>Hello, @context.User.Identity.Name</h3>
+    </Authorized>
+    <NotAuthorized> Log in to enter the system! </NotAuthorized>
+</AuthorizeView> Here you can interact with your desired shifts <button @onclick='() => NavMgr.NavigateTo("Login")'>Go to login</button>

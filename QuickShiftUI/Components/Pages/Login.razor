@@ -1,0 +1,65 @@
+﻿@page "/Login"
+@using DTOs
+@using QuickShiftUI.Components.Auth
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager navMgr
+
+<h3>Login</h3>
+
+<AuthorizeView>
+    <NotAuthorized Context="notAuthContext">
+        <EditForm Model="authEmployee" OnValidSubmit="LoginAsync">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            
+            <div class="mt-4">
+                <label>Working Number:</label>
+                <InputNumber @bind-Value="authEmployee.WorkingNumber"/>
+            </div>
+            <div class="mt-4">
+                <label>Password:</label>
+                <InputText type="password" @bind-Value="authEmployee.Password"/>
+            </div>
+        
+            <button class="mt-4" type="submit">Login</button>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(errorLabel))
+        {
+            <label style="color: red"> @errorLabel </label>
+        }
+    </NotAuthorized>
+    
+    <Authorized>
+        <h3>Hello, @context.User.Identity.Name</h3>
+    </Authorized>
+    
+</AuthorizeView>
+
+@code {
+
+    private string errorLabel;
+
+    private AuthEmployeeDTO authEmployee = new AuthEmployeeDTO();
+
+    private async Task LoginAsync()
+    {
+        Console.WriteLine(authEmployee.WorkingNumber + authEmployee.Password);
+        if (authEmployee.WorkingNumber == 0 || string.IsNullOrEmpty(authEmployee.Password))
+        {
+            errorLabel = "Working Number and Password are required.";
+            return;
+        }
+
+        try
+        {
+            await ((SimpleAuthProvider)AuthProvider).Login(authEmployee.WorkingNumber, authEmployee.Password);
+            navMgr.NavigateTo("/");
+        }
+        catch (Exception e)
+        {
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+
+}

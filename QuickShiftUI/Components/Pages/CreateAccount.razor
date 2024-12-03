@@ -1,0 +1,64 @@
+﻿@page "/CreateAccount"
+@using DTOs
+@using QuickShiftUI.Components.Auth
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager navMgr
+
+<h3>Create Account</h3>
+
+<EditForm Model="newEmployee" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mt-4">
+        <label>First Name:</label>
+        <InputText @bind-Value="newEmployee.FirstName" />
+    </div>
+    <div class="mt-4">
+        <label>Last Name:</label>
+        <InputText @bind-Value="newEmployee.LastName" />
+    </div>
+    <div class="mt-4">
+        <label>Working Number:</label>
+        <InputNumber @bind-Value="newEmployee.WorkingNumber" />
+    </div>
+    <div class="mt-4">
+        <label>Email:</label>
+        <InputText @bind-Value="newEmployee.Email" />
+    </div>
+    <div class="mt-4">
+        <label>Password:</label>
+        <InputText type="password" @bind-Value="newEmployee.Password" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorLabel))
+    {
+    <label class="mt-4" style="color: red"> @errorLabel </label> <br/>
+    }
+    
+    <button class="mt-4" type="submit">Register</button>
+</EditForm>
+
+@code {
+    private NewEmployeeDTO newEmployee = new NewEmployeeDTO();
+    private string errorLabel;
+
+    private async Task HandleValidSubmit()
+    {
+        if (string.IsNullOrEmpty(newEmployee.FirstName) || string.IsNullOrEmpty(newEmployee.LastName) || newEmployee.WorkingNumber == 0 || string.IsNullOrEmpty(newEmployee.Email) || string.IsNullOrEmpty(newEmployee.Password))
+        {
+            errorLabel = "Please fill out all fields in the form.";
+            return;
+        }
+        
+        try
+        {
+            await ((SimpleAuthProvider)AuthProvider).Register(newEmployee.FirstName, newEmployee.LastName, newEmployee.WorkingNumber, newEmployee.Email, newEmployee.Password);
+            navMgr.NavigateTo("Login");
+        }
+        catch (Exception e)
+        {
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+}
