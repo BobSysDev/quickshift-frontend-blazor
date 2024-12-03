@@ -26,7 +26,7 @@
                     </p>
 
                     <p><b>Location: </b> <span>@displayedShift.Location</span></p>
-
+ 
 
                     <p><b>Status: </b> <span>@displayedShift.ShiftStatus</span> </p>
 
@@ -56,7 +56,14 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        displayedShift = await ShiftService.GetShiftByIdAsync(Id);
+        try
+        {
+            displayedShift = await ShiftService.GetShiftByIdAsync(Id);
+        }
+        catch
+        {
+            Navigation.NavigateTo("/MyShifts");
+        }
     }
 
     private void BackToShifts()
