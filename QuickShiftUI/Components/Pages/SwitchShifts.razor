@@ -9,6 +9,7 @@
 @inject AuthenticationStateProvider AuthProvider
 
 
+
 <h3>Switch Shifts</h3>
 
 
@@ -18,16 +19,121 @@
 
     <Authorized>
 
+        @* Accept a switch - invisible until final confirmation on switch needed *@
+        
+        <div>
+            <h4>Pending switch</h4>
+            <div> @* links to switch request *@
+                
+            </div> 
+        </div>
+
         @* Offer a shift to swhitch *@
+
+        <div>
+            <h4>Request a switch</h4>
+            <div> @* pending requests that have not been actepted by other employee yet *@
+                <div></div>
+            </div> 
+            
+            <div> @* Pick a shift to offer for switch *@
+                
+                @* <DxListBox Data="@Data"
+                           TextFieldName="@nameof(Employee.Text)"
+                           @bind-Value="@Value"
+                           CssClass="cw-400 chi-220">
+                </DxListBox>
+                <p class="demo-text cw-400 mt-2">
+                    Selected item: <b>@Value?.Text</b>
+                </p>-----> template for a list box *@
+                
+            </div> 
+            
+            <div> @* pick a timeframe for a shift to sitch for *@
+                
+            </div>
+            
+            <div>
+                <button>Make a request</button>
+                <button>Cancel</button>
+            </div>
+        </div>
+
+        @* See offers of other employees *@
+
+        <div>
+            <h4>Shift switch offers</h4>
+            
+            @* list of offers (shift + timeframe of re) *@
+            <div></div>
+
+            @* list of your shifts in the timeframe of selected shift *@
+            <div></div>
+
+            <div>
+                <button>Make a request</button>
+                <button>Cancel</button>
+            </div>
+
+        </div>
+
+        @* See shifts of other employees and request shift switch for a specific shift *@
         
-        @* See available shifts *@
-        
+        <div>
+            <div> @* calendar time range picker from https://demos.devexpress.com/blazor/DateRangePicker (to configure) *@
+                
+                <label for="deOverview" class="demo-text cw-320 mb-1">Date Range</label>
+                <DxDateRangePicker @bind-StartDate="@DateTimeStart"
+                                   @bind-EndDate="@DateTimeEnd"
+                                   CssClass="cw-320"
+                                   InputId="deOverview"/>
+                <p class="demo-text cw-320 mt-3">
+                    Selected Date Range:
+                    <b>@DateTimeStart.ToString("dddd, dd MMMM yyyy")</b> - <b>@DateTimeEnd.ToString("dddd, dd MMMM yyyy")</b>
+                    
+                </p>
+            </div>
+            
+            <div> @* list of other employees shifts in that timeframe *@
+                
+            </div>
+
+            <div> @* list of your shifts to offer for switch *@
+
+            </div>
+
+            <div>
+                <button>Make a request</button>
+                <button>Cancel</button>
+            </div>
+            
+        </div>
+
         @* See open shifts - no employee assigned *@
-        
+
+        <div>
+            <h4>Open shifts</h4>
+            <div>
+                @* list of shifts here *@
+            </div>
+        </div>
+
         @*  *@
-        
+
     </Authorized>
     
 </AuthorizeView>
 
-@code {}
+@code {
+    
+    DateTime DateTimeStart { get; set; } = DateTime.Today;
+    DateTime DateTimeEnd { get; set; } = DateTime.Today.AddDays(7);
+    
+    /* IEnumerable<Employee> Data { get; set; }
+    Employee Value { get; set; }
+    protected override async Task OnInitializedAsync() {
+        Data = await NwindDataService.GetEmployeesAsync();
+        Value = Data.FirstOrDefault(); -----> template code for  */ 
+    }
+
+}
