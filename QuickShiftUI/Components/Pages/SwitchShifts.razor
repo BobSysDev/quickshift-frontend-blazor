@@ -1,0 +1,33 @@
+﻿@page "/SwitchShifts"
+
+@using DTOs.Shift
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+@rendermode InteractiveServer
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+
+<h3>Switch Shifts</h3>
+
+
+<AuthorizeView>
+
+    <NotAuthorized></NotAuthorized>
+
+    <Authorized>
+
+        @* Offer a shift to swhitch *@
+        
+        @* See available shifts *@
+        
+        @* See open shifts - no employee assigned *@
+        
+        @*  *@
+        
+    </Authorized>
+    
+</AuthorizeView>
+
+@code {}
