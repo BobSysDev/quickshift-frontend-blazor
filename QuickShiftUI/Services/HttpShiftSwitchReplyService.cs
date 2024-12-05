@@ -13,7 +13,7 @@ public class HttpShiftSwitchReplyService : IShiftSwitchReplyService
         _httpClient = httpClient;
     }
     
-    public async Task CreateShiftSwitchReplyAsync(long requestId, ShiftSwitchReplyDTO shiftSwitchReplyDto)
+    public async Task CreateShiftSwitchReplyAsync(long requestId, NewShiftSwitchReplyDTO shiftSwitchReplyDto)
     {
         await _httpClient.PostAsJsonAsync("ShiftSwitching/Request/{requestId}/Reply", shiftSwitchReplyDto);
     }
@@ -28,7 +28,7 @@ public class HttpShiftSwitchReplyService : IShiftSwitchReplyService
         return await _httpClient.GetFromJsonAsync<ShiftSwitchReplyDTO>("ShiftSwitching/Reply/{ID}");
     }
 
-    public async Task<ShiftSwitchReplyDTO> UpdateShiftSwitchReplyAsync(long Id, ShiftSwitchReplyDTO shiftSwitchReplyDto)
+    public async Task<ShiftSwitchReplyDTO> UpdateShiftSwitchReplyAsync(long Id, UpdateShiftSwitchReplyDTO shiftSwitchReplyDto)
     {
         HttpResponseMessage response = await _httpClient.PatchAsJsonAsync($"ShiftSwitching/Reply/{Id}", shiftSwitchReplyDto);
         ShiftSwitchReplyDTO responseDTO = JsonSerializer.Deserialize<ShiftSwitchReplyDTO>(await response.Content.ReadAsStringAsync());

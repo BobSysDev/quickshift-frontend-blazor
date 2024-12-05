@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using DTOs.Shift;
+using DTOs.ShiftSwitching;
 
 namespace QuickShiftUI.Services;
 
@@ -12,7 +13,7 @@ public class HttpShiftSwitchRequestService : IShiftSwitchRequestService
         _httpClient = httpClient;
     }
     
-    public async Task CreateShiftSwitchRequestAsync(ShiftSwitchRequestDTO shiftSwitchRequestDto)
+    public async Task CreateShiftSwitchRequestAsync(NewShiftSwitchRequestDTO shiftSwitchRequestDto)
     {
         await _httpClient.PostAsJsonAsync("ShiftSwitching/Request", shiftSwitchRequestDto);
     }
@@ -22,7 +23,7 @@ public class HttpShiftSwitchRequestService : IShiftSwitchRequestService
         return await _httpClient.GetFromJsonAsync<ShiftSwitchRequestDTO>($"ShiftSwitching/Request/{Id}");
     }
 
-    public async Task<ShiftSwitchRequestDTO> UpdateRequestAsync(long Id, ShiftSwitchRequestDTO shiftSwitchRequestDto)
+    public async Task<ShiftSwitchRequestDTO> UpdateRequestAsync(long Id, UpdateShiftSwitchRequestDTO shiftSwitchRequestDto)
     {
         HttpResponseMessage response = await _httpClient.PatchAsJsonAsync($"ShiftSwitching/Request/{Id}", shiftSwitchRequestDto);
         ShiftSwitchRequestDTO responseDTO = JsonSerializer.Deserialize<ShiftSwitchRequestDTO>(await response.Content.ReadAsStringAsync());
