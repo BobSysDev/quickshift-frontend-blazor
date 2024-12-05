@@ -1,36 +1,46 @@
-﻿using DTOs.Shift;
+﻿using System.Text.Json;
+using DTOs.Shift;
 
 namespace QuickShiftUI.Services;
 
 public class HttpShiftSwitchRequestService : IShiftSwitchRequestService
 {
-    public Task<ShiftSwitchRequestDTO> CreateShiftSwitchRequestAsync(ShiftSwitchRequestDTO shiftSwitchRequestDto)
+    private readonly HttpClient _httpClient;
+    
+    public HttpShiftSwitchRequestService(HttpClient httpClient)
     {
-        throw new NotImplementedException();
+        _httpClient = httpClient;
+    }
+    
+    public async Task CreateShiftSwitchRequestAsync(ShiftSwitchRequestDTO shiftSwitchRequestDto)
+    {
+        await _httpClient.PostAsJsonAsync("ShiftSwitching/Request", shiftSwitchRequestDto);
     }
 
-    public Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByIdAsync(long Id)
+    public async Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByIdAsync(long Id)
     {
-        throw new NotImplementedException();
+        return await _httpClient.GetFromJsonAsync<ShiftSwitchRequestDTO>($"ShiftSwitching/Request/{Id}");
     }
 
-    public Task<ShiftSwitchRequestDTO> UpdateRequestAsync(long Id, ShiftSwitchRequestDTO shiftSwitchRequestDto)
+    public async Task<ShiftSwitchRequestDTO> UpdateRequestAsync(long Id, ShiftSwitchRequestDTO shiftSwitchRequestDto)
     {
-        throw new NotImplementedException();
+        HttpResponseMessage response = await _httpClient.PatchAsJsonAsync($"ShiftSwitching/Request/{Id}", shiftSwitchRequestDto);
+        ShiftSwitchRequestDTO responseDTO = JsonSerializer.Deserialize<ShiftSwitchRequestDTO>(await response.Content.ReadAsStringAsync());
+        return responseDTO;
     }
 
-    public Task DeleteShiftSwitchRequestAsync(long Id)
+    public async Task DeleteShiftSwitchRequestAsync(long Id)
     {
-        throw new NotImplementedException();
+        await _httpClient.DeleteAsync("ShiftSwitching/Request/{Id}");
     }
 
-    public Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByShiftIdAsync(long shiftId)
+    public async Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByShiftIdAsync(long shiftId)
     {
-        throw new NotImplementedException();
+        return await _httpClient.GetFromJsonAsync<ShiftSwitchRequestDTO>($"Shift/{shiftId}/ShiftSwitching/Request");
     }
 
-    public Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByEmployeeIdAsync(long employeeId)
+    public async Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByEmployeeIdAsync(long employeeId)
     {
-        throw new NotImplementedException();
+        return await _httpClient.GetFromJsonAsync<ShiftSwitchRequestDTO>($"Employee/{employeeId}/ShiftSwitching/Request");
     }
 }

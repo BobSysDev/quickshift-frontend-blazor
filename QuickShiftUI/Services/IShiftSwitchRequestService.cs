@@ -3,7 +3,7 @@ using DTOs.Shift;
 
 public interface IShiftSwitchRequestService
 {
-    Task<ShiftSwitchRequestDTO> CreateShiftSwitchRequestAsync(ShiftSwitchRequestDTO shiftSwitchRequestDto);
+    Task CreateShiftSwitchRequestAsync(ShiftSwitchRequestDTO shiftSwitchRequestDto);
     Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByIdAsync(long Id);
     Task<ShiftSwitchRequestDTO> UpdateRequestAsync(long Id, ShiftSwitchRequestDTO shiftSwitchRequestDto);
     Task DeleteShiftSwitchRequestAsync(long Id);
