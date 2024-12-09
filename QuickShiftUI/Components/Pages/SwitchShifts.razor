@@ -38,14 +38,6 @@
             
             <div> @* Pick a shift to offer for switch *@
                 
-                @* <DxListBox Data="@Data"
-                           TextFieldName="@nameof(Employee.Text)"
-                           @bind-Value="@Value"
-                           CssClass="cw-400 chi-220">
-                </DxListBox>
-                <p class="demo-text cw-400 mt-2">
-                    Selected item: <b>@Value?.Text</b>
-                </p>-----> template for a list box *@
                 
             </div> 
             
@@ -82,16 +74,7 @@
         <div>
             <div> @* calendar time range picker from https://demos.devexpress.com/blazor/DateRangePicker (to configure) *@
                 
-                <label for="deOverview" class="demo-text cw-320 mb-1">Date Range</label>
-                <DxDateRangePicker @bind-StartDate="@DateTimeStart"
-                                   @bind-EndDate="@DateTimeEnd"
-                                   CssClass="cw-320"
-                                   InputId="deOverview"/>
-                <p class="demo-text cw-320 mt-3">
-                    Selected Date Range:
-                    <b>@DateTimeStart.ToString("dddd, dd MMMM yyyy")</b> - <b>@DateTimeEnd.ToString("dddd, dd MMMM yyyy")</b>
-                    
-                </p>
+                
             </div>
             
             <div> @* list of other employees shifts in that timeframe *@
@@ -126,14 +109,6 @@
 
 @code {
     
-    DateTime DateTimeStart { get; set; } = DateTime.Today;
-    DateTime DateTimeEnd { get; set; } = DateTime.Today.AddDays(7);
     
-    /* IEnumerable<Employee> Data { get; set; }
-    Employee Value { get; set; }
-    protected override async Task OnInitializedAsync() {
-        Data = await NwindDataService.GetEmployeesAsync();
-        Value = Data.FirstOrDefault(); -----> template code for  */ 
-    }
 
 }
