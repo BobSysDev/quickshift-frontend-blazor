@@ -32,7 +32,7 @@
         @* Offer a shift to swhitch *@
 
         <div>
-            <h4>Request a switch</h4>
+            <h4>Make a switch offer</h4>
             <div>
                 @* pending requests that have not been actepted by other employee yet *@
                 <div></div>
@@ -51,11 +51,8 @@
                     </select>
                 </div>
 
-                <div class="grid">
-                    <QuickGrid Items="@shifts" Pagination="@pagination">
-                        <PropertyColumn Property="@(c => c.TypeOfShift)" Sortable="true"/>
-                        <PropertyColumn Property="@(c => c.Id)" Sortable="true" Align="Align.Right"/>
-                    </QuickGrid>
+                <div class=""> @* list here *@
+                    
                 </div>
 
                 <Paginator State="@pagination"/>
@@ -94,6 +91,7 @@
         @* See shifts of other employees and request shift switch for a specific shift *@
 
         <div>
+            <h4>Request shift switch</h4>
             <div>
                 @* calendar time range picker *@
 
@@ -133,15 +131,10 @@
 </AuthorizeView>
 
 @code {
-    private IQueryable<ShiftDTO> shifts;
-    
-    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    private List<ShiftDTO> shifts;
 
-    private void RedirectToShift(long Id)
-    {
-        Console.WriteLine(Id);
-        Navigation.NavigateTo($"/MyShifts/{Id}");
-    }
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
     private int loggedInUserId;
@@ -157,13 +150,14 @@
             if (int.TryParse(userIdClaim, out int userId))
             {
                 loggedInUserId = userId;
-                shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).AsQueryable();
+                shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
                 Console.WriteLine(shifts.Any());
-                Console.WriteLine(userId);  
+                Console.WriteLine(userId);
                 StateHasChanged();
             }
         }
     }
-    }
+
+}
 
 }
