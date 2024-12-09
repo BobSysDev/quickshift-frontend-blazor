@@ -2,12 +2,12 @@
 
 @using DTOs.Shift
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.QuickGrid
 @using QuickShiftUI.Services
 @rendermode InteractiveServer
 @inject IShiftService ShiftService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
-
 
 
 <h3>Switch Shifts</h3>
@@ -20,31 +20,53 @@
     <Authorized>
 
         @* Accept a switch - invisible until final confirmation on switch needed *@
-        
+
         <div>
             <h4>Pending switch</h4>
-            <div> @* links to switch request *@
-                
-            </div> 
+            <div>
+                @* links to switch request *@
+
+            </div>
         </div>
 
         @* Offer a shift to swhitch *@
 
         <div>
             <h4>Request a switch</h4>
-            <div> @* pending requests that have not been actepted by other employee yet *@
+            <div>
+                @* pending requests that have not been actepted by other employee yet *@
                 <div></div>
-            </div> 
-            
-            <div> @* Pick a shift to offer for switch *@
-                
-                
-            </div> 
-            
-            <div> @* pick a timeframe for a shift to sitch for *@
-                
             </div>
-            
+
+            <div>
+                @* Pick a shift to offer for switch *@
+
+                <div class="page-size-chooser">
+                    Items per page:
+                    <select @bind="@pagination.ItemsPerPage">
+                        <option>5</option>
+                        <option>10</option>
+                        <option>20</option>
+                        <option>50</option>
+                    </select>
+                </div>
+
+                <div class="grid">
+                    <QuickGrid Items="@shifts" Pagination="@pagination">
+                        <PropertyColumn Property="@(c => c.TypeOfShift)" Sortable="true"/>
+                        <PropertyColumn Property="@(c => c.Id)" Sortable="true" Align="Align.Right"/>
+                    </QuickGrid>
+                </div>
+
+                <Paginator State="@pagination"/>
+
+            </div>
+
+            <div>
+                @* pick a timeframe for a shift to sitch for *@
+
+            </div>
+
             <div>
                 <button>Make a request</button>
                 <button>Cancel</button>
@@ -55,7 +77,7 @@
 
         <div>
             <h4>Shift switch offers</h4>
-            
+
             @* list of offers (shift + timeframe of re) *@
             <div></div>
 
@@ -70,18 +92,21 @@
         </div>
 
         @* See shifts of other employees and request shift switch for a specific shift *@
-        
+
         <div>
-            <div> @* calendar time range picker *@
-                
-                
-            </div>
-            
-            <div> @* list of other employees shifts in that timeframe *@
-                
+            <div>
+                @* calendar time range picker *@
+
+
             </div>
 
-            <div> @* list of your shifts to offer for switch *@
+            <div>
+                @* list of other employees shifts in that timeframe *@
+
+            </div>
+
+            <div>
+                @* list of your shifts to offer for switch *@
 
             </div>
 
@@ -89,7 +114,7 @@
                 <button>Make a request</button>
                 <button>Cancel</button>
             </div>
-            
+
         </div>
 
         @* See open shifts - no employee assigned *@
@@ -104,11 +129,41 @@
         @*  *@
 
     </Authorized>
-    
+
 </AuthorizeView>
 
 @code {
+    private IQueryable<ShiftDTO> shifts;
     
-    
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+
+    private void RedirectToShift(long Id)
+    {
+        Console.WriteLine(Id);
+        Navigation.NavigateTo($"/MyShifts/{Id}");
+    }
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+                shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).AsQueryable();
+                Console.WriteLine(shifts.Any());
+                Console.WriteLine(userId);  
+                StateHasChanged();
+            }
+        }
+    }
+    }
 
 }
