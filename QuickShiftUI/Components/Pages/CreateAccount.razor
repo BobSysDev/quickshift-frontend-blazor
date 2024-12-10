@@ -4,11 +4,12 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager navMgr
 
-<h3>Create Account</h3>
+<div class="create-account-container">
+    <h2>Create Account</h2>
 
-<EditForm Model="newEmployee" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+    <EditForm Model="newEmployee" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
     <div class="mt-4">
         <label>First Name:</label>
@@ -53,11 +54,13 @@
         
         try
         {
+
             await ((SimpleAuthProvider)AuthProvider).Register(newEmployee.FirstName, newEmployee.LastName, newEmployee.WorkingNumber, newEmployee.Email, newEmployee.Password);
             navMgr.NavigateTo("Login");
         }
         catch (Exception e)
         {
+
             errorLabel = $"Error: {e.Message}";
         }
     }

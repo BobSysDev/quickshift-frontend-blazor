@@ -43,5 +43,4 @@ public class HttpShiftService : IShiftService
     {
         return await _httpClient.GetFromJsonAsync<List<ShiftDTO>>($"Shifts/Employee/{userId}");
     }
-    
 }

@@ -1,5 +1,20 @@
 ﻿@page "/"
-@inject NavigationManager NavMgr 
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="home-container">
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to QuickShift!</h1>
+        <p class="lead">Manage your shifts and employees efficiently.</p>
+        <hr class="my-4">
+        <p>Get started by logging in or creating a new account.</p>
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="/login" role="button">Login</a>
+            <a class="btn btn-secondary btn-lg" href="/createAccount" role="button">Create Account</a>
+        </p>
+    </div>
+</div>
+
 
 <PageTitle>Home</PageTitle>
 <h1>QuickShift</h1>
