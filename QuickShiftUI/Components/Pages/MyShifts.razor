@@ -8,37 +8,39 @@
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthProvider
 
-<h3>My Shifts</h3>
+<div class="my-shifts-container">
+    <h3>My Shifts</h3>
 
-<AuthorizeView>
-    <NotAuthorized>
-        <p>Please log in to view your shifts</p>
-    </NotAuthorized>
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>Please log in to view your shifts</p>
+        </NotAuthorized>
 
-    <Authorized Context="authorizedUser">
-        @if (shifts == null)
-        {
-            <p class="mt-4">
-                <em>Loading...</em>
-            </p>
-        }
-        else if (!shifts.Any())
-        {
-            <p class="mt-4">No shifts available.</p>
-        }
-        else
-        {
-            <ul class="list-group mt-4">
-                @foreach (var ShiftDTO in shifts)
-                {
-                    <li class="list-group-item">
-                        <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
-                    </li>
-                }
-            </ul>
-        }
-    </Authorized>
-</AuthorizeView>
+        <Authorized Context="authorizedUser">
+            @if (shifts == null)
+            {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+            }
+            else if (!shifts.Any())
+            {
+                <p class="mt-4">No shifts available.</p>
+            }
+            else
+            {
+                <ul class="list-group mt-4">
+                    @foreach (var ShiftDTO in shifts)
+                    {
+                        <li class="list-group-item">
+                            <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
+                        </li>
+                    }
+                </ul>
+            }
+        </Authorized>
+    </AuthorizeView>
+</div>
 
 @code {
     private IEnumerable<ShiftDTO> shifts;
@@ -46,7 +48,7 @@
     private void RedirectToShift(long Id)
     {
         Console.WriteLine(Id);
-        Navigation.NavigateTo($"/MyShifts/{Id}");
+        Navigation.NavigateTo($"/shift/{Id}");
     }
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
@@ -64,7 +66,7 @@
             {
                 loggedInUserId = userId;
                 var allShifts = await ShiftService.GetAllShiftsAsync();
-                shifts = allShifts.Where(shift => shift.Id == loggedInUserId); 
+                shifts = allShifts.Where(shift => shift.EmployeeId == loggedInUserId);
             }
         }
     }

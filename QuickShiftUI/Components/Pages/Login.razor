@@ -3,27 +3,34 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager navMgr
 
-<h3>This is where you login</h3>
+<div class="login-container">
+    <h3>Login</h3>
 
-<h3>Login</h3>
+    <AuthorizeView>
+        <NotAuthorized>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="workingNumber">Working Number:</label>
+                    <input type="number" id="workingNumber" class="form-control" @bind="workingNumber"/>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" class="form-control" @bind="password"/>
+                </div>
+                @if (!string.IsNullOrEmpty(errorLabel))
+                {
+                    <div class="alert alert-danger">@errorLabel</div>
+                }
+                <button class="btn btn-primary" @onclick="LoginAsync">Log in</button>
+            </div>
+        </NotAuthorized>
+        <Authorized>
+            <h3>Hello, @context.User.Identity.Name</h3>
+        </Authorized>
+    </AuthorizeView>
+</div>
 
-<AuthorizeView>
-    <NotAuthorized>
-        <h3>Please login</h3>
-        <label>Working Number:</label>
-        <input type="number" @bind="workingNumber"/>
-        <label>Password:</label>
-        <input type="password" @bind="password"/>
-        @if (!string.IsNullOrEmpty(errorLabel))
-        {
-            <label style="color: red"> @errorLabel </label>
-        }
-        <button @onclick="LoginAsync">Log in</button>
-    </NotAuthorized>
-    <Authorized>
-        <h3>Hello, @context.User.Identity.Name</h3>
-    </Authorized>
-</AuthorizeView>
+
 
 @code {
     private string workingNumber;
@@ -37,7 +44,7 @@
             errorLabel = "Working Number and Password are required.";
             return;
         }
-        
+
         try
         {
             int workingNumberInt = int.Parse(workingNumber);
@@ -47,6 +54,6 @@
         catch (Exception e)
         {
             errorLabel = $"Error: {e.Message}";
-        }}
+        }
     }
 }
