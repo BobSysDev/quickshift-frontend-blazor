@@ -1,45 +1,52 @@
-﻿@page "/login"
+﻿@page "/Login"
+@using DTOs
 @using QuickShiftUI.Components.Auth
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager navMgr
 
-<div class="login-container">
-    <h3>Login</h3>
 
-    <AuthorizeView>
-        <NotAuthorized>
-            <div class="login-form">
-                <div class="form-group">
-                    <label for="workingNumber">Working Number:</label>
-                    <input type="number" id="workingNumber" class="form-control" @bind="workingNumber"/>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" class="form-control" @bind="password"/>
-                </div>
-                @if (!string.IsNullOrEmpty(errorLabel))
-                {
-                    <div class="alert alert-danger">@errorLabel</div>
-                }
-                <button class="btn btn-primary" @onclick="LoginAsync">Log in</button>
+<h3>Login</h3>
+
+<AuthorizeView>
+    <NotAuthorized Context="notAuthContext">
+        <EditForm Model="authEmployee" OnValidSubmit="LoginAsync">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            
+            <div class="mt-4">
+                <label>Working Number:</label>
+                <InputNumber @bind-Value="authEmployee.WorkingNumber"/>
             </div>
-        </NotAuthorized>
-        <Authorized>
-            <h3>Hello, @context.User.Identity.Name</h3>
-        </Authorized>
-    </AuthorizeView>
-</div>
+            <div class="mt-4">
+                <label>Password:</label>
+                <InputText type="password" @bind-Value="authEmployee.Password"/>
+            </div>
+        
+            <button class="mt-4" type="submit">Login</button>
+        </EditForm>
 
-
+        @if (!string.IsNullOrEmpty(errorLabel))
+        {
+            <label style="color: red"> @errorLabel </label>
+        }
+    </NotAuthorized>
+    
+    <Authorized>
+        <h3>Hello, @context.User.Identity.Name</h3>
+    </Authorized>
+    
+</AuthorizeView>
 
 @code {
-    private string workingNumber;
-    private string password;
+
     private string errorLabel;
+
+    private AuthEmployeeDTO authEmployee = new AuthEmployeeDTO();
 
     private async Task LoginAsync()
     {
-        if (string.IsNullOrEmpty(workingNumber) || string.IsNullOrEmpty(password))
+        Console.WriteLine(authEmployee.WorkingNumber + authEmployee.Password);
+        if (authEmployee.WorkingNumber == 0 || string.IsNullOrEmpty(authEmployee.Password))
         {
             errorLabel = "Working Number and Password are required.";
             return;
@@ -47,8 +54,7 @@
 
         try
         {
-            int workingNumberInt = int.Parse(workingNumber);
-            await ((SimpleAuthProvider)AuthProvider).Login(workingNumberInt, password);
+            await ((SimpleAuthProvider)AuthProvider).Login(authEmployee.WorkingNumber, authEmployee.Password);
             navMgr.NavigateTo("/");
         }
         catch (Exception e)
@@ -56,4 +62,5 @@
             errorLabel = $"Error: {e.Message}";
         }
     }
+
 }
