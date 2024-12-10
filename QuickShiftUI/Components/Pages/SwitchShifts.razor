@@ -17,13 +17,13 @@
 
     <NotAuthorized></NotAuthorized>
 
-    <Authorized>
+    <Authorized Context="authorizedUser">
 
         @* Accept a switch - invisible until final confirmation on switch needed *@
 
-        <div>
+        <div class="mt-4">
             <h4>Pending switch</h4>
-            <div>
+            <div class="mt-4">
                 @* links to switch request *@
 
             </div>
@@ -31,31 +31,40 @@
 
         @* Offer a shift to swhitch *@
 
-        <div>
-            <h4>Make a switch offer</h4>
-            <div>
+        <div class="mt-4">
+            <h4 class="mt-4">Make a switch offer from your shift</h4>
+            <div class="mt-4">
                 @* pending requests that have not been actepted by other employee yet *@
                 <div></div>
             </div>
 
-            <div>
+            <div class="mt-4">
                 @* Pick a shift to offer for switch *@
-
-                <div class="page-size-chooser">
-                    Items per page:
-                    <select @bind="@pagination.ItemsPerPage">
-                        <option>5</option>
-                        <option>10</option>
-                        <option>20</option>
-                        <option>50</option>
-                    </select>
-                </div>
-
-                <div class=""> @* list here *@
-                    
-                </div>
-
-                <Paginator State="@pagination"/>
+                
+                    @if (myShifts == null)
+                    {
+                        <p class="mt-4">
+                            <em>Loading...</em>
+                        </p>
+                    }
+                    else if (!myShifts.Any())
+                    {
+                        <p class="mt-4">No shifts available.</p>
+                    }
+                    else
+                    {
+                        <ul class="list-group mt-4">
+                            @foreach (var ShiftDTO in myShifts)
+                            {
+                                <li class="list-group-item">
+                                    <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
+                                    <button style="float:right">Select</button>
+                                    <span style=" float:right">@ShiftDTO.EndDateTime </span>
+                                    <span style="float:right">@ShiftDTO.StartDateTime - </span>
+                                </li>
+                            }
+                        </ul>
+                    }
 
             </div>
 
@@ -63,62 +72,66 @@
                 @* pick a timeframe for a shift to sitch for *@
 
             </div>
-
-            <div>
-                <button>Make a request</button>
-                <button>Cancel</button>
-            </div>
+            
         </div>
 
         @* See offers of other employees *@
 
-        <div>
-            <h4>Shift switch offers</h4>
+        <div class="mt-4">
+            <h4 class="mt-4">Shift switch offers</h4>
 
             @* list of offers (shift + timeframe of re) *@
-            <div></div>
+            <div class="mt-4"></div>
 
             @* list of your shifts in the timeframe of selected shift *@
-            <div></div>
-
-            <div>
-                <button>Make a request</button>
-                <button>Cancel</button>
-            </div>
+            <div class="mt-4"></div>
 
         </div>
 
         @* See shifts of other employees and request shift switch for a specific shift *@
 
-        <div>
-            <h4>Request shift switch</h4>
-            <div>
+        <div class="mt-4">
+            <h4 class="mt-4">Request shift switch</h4>
+            <div class="mt-4">
                 @* calendar time range picker *@
 
 
             </div>
 
-            <div>
+            <div class="mt-4">
                 @* list of other employees shifts in that timeframe *@
-
-            </div>
-
-            <div>
-                @* list of your shifts to offer for switch *@
-
-            </div>
-
-            <div>
-                <button>Make a request</button>
-                <button>Cancel</button>
+                @if (allShifts == null)
+                {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+                }
+                else if (!allShifts.Any())
+                {
+                <p class="mt-4">No shifts available.</p>
+                }
+                else
+                {
+                <ul class="list-group mt-4">
+                    @foreach (var ShiftDTO in allShifts)
+                    {
+                    <li class="list-group-item">
+                        <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
+                        <button @onclick="() => RedirectToRequest(ShiftDTO.Id)" style="float:right">Select</button>
+                        <span style=" float:right">@ShiftDTO.EndDateTime</span>
+                        <span style="float:right">@ShiftDTO.StartDateTime - </span>
+                    </li>
+                    }
+                </ul>
+                }
             </div>
 
         </div>
 
         @* See open shifts - no employee assigned *@
 
-        <div>
-            <h4>Open shifts</h4>
+        <div class="mt-4">
+            <h4 class="mt-4">Open shifts</h4>
             <div>
                 @* list of shifts here *@
             </div>
@@ -131,10 +144,19 @@
 </AuthorizeView>
 
 @code {
-    private List<ShiftDTO> shifts;
-
-    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    private List<ShiftDTO> myShifts;
+    private List<ShiftDTO> allShifts;
     
+    private void RedirectToShift(long Id)
+    {
+        Console.WriteLine(Id);
+        Navigation.NavigateTo($"/MyShifts/{Id}");
+    }
+    
+    private void RedirectToRequest(long Id)
+    {
+        Navigation.NavigateTo($"/SwitchRequest/{Id}");
+    }
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
     private int loggedInUserId;
@@ -150,14 +172,13 @@
             if (int.TryParse(userIdClaim, out int userId))
             {
                 loggedInUserId = userId;
-                shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
-                Console.WriteLine(shifts.Any());
+                myShifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
+                allShifts = (await ShiftService.GetAllShiftsAsync()).ToList();
+                Console.WriteLine(myShifts.Any());
                 Console.WriteLine(userId);
                 StateHasChanged();
             }
         }
     }
-
-}
 
 }

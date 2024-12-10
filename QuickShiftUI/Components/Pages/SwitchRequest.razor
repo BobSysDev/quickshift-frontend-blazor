@@ -1,18 +1,122 @@
-﻿@page "/SwitchRequest"
+﻿@page "/SwitchRequest/{Id:long}"
+@using DTOs.Shift
+@using DTOs.ShiftSwitching
+@using QuickShiftUI.Services
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
 
-<h3>SwitchRequest</h3>
+<h3>Switch Request</h3>
+
+<h4 class="mt-4">Shift to receive</h4>
 
 @* Shift of another employee details *@
+@if (shift != null)
+{
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>@shift.TypeOfShift</h4>
+        </div>
 
+        <div class="card-body">
+            <p><b>Employee assigned: </b><span>@shift.AssignedEmployees</span></p>
+            <p>
+                <b>Start time: </b><span>@shift.StartDateTime</span>
+                <br/>
+                <b>End time: </b><span>@shift.EndDateTime</span>
+            </p>
+
+            <p>
+                <b>Location: </b> <span>@shift.Location</span>
+            </p>
+
+            <p>
+                <b>Shift description:</b>
+                <br>
+                <span>@shift.Description</span>
+            </p>
+        </div>
+
+    </div>
+}
+
+<h4 class="mt-4">Choose shift</h4>
 @* Offered shift details *@
 
-@* Confirm *@
 <div>
+    @if (myShifts == null)
+    {
+        <p class="mt-4">
+            <em>Loading...</em>
+        </p>
+    }
+    else if (!myShifts.Any())
+    {
+        <p class="mt-4">No shifts available.</p>
+    }
+    else
+    {
+        <ul class="list-group mt-4">
+            @foreach (var ShiftDTO in myShifts)
+            {
+                <li class="list-group-item">
+                    <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
+                    <button style="float:right">Select</button>
+                    <span style=" float:right">@ShiftDTO.EndDateTime </span>
+                    <span style="float:right">@ShiftDTO.StartDateTime - </span>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@* Confirm *@
+<div class="mt-4">
     <button>Confrim</button>
     <button>Reject</button>
 </div>
 
 
 @code {
+    private List<ShiftDTO> myShifts;
+    [Parameter] public long Id { get; set; }
+    public ShiftDTO? shift { get; set; }
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+
+    private void RedirectToShift(long Id)
+    {
+        Console.WriteLine(Id);
+        Navigation.NavigateTo($"/MyShifts/{Id}");
+    }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            shift = await ShiftService.GetShiftByIdAsync(Id);
+        }
+        catch
+        {
+            Navigation.NavigateTo("/SwitchShifts");
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+                myShifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
+                StateHasChanged();
+            }
+        }
+    }
 
 }
