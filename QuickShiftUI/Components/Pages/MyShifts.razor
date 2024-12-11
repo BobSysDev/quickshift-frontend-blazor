@@ -11,12 +11,12 @@
 <div class="my-shifts-container">
     <h3>My Shifts</h3>
 
-    <AuthorizeView>
+    @*<AuthorizeView>
         <NotAuthorized>
             <p>Please log in to view your shifts</p>
         </NotAuthorized>
 
-        <Authorized Context="authorizedUser">
+        <Authorized Context="authorizedUser">*@
             @if (shifts == null)
             {
                 <p class="mt-4">
@@ -37,9 +37,9 @@
                         </li>
                     }
                 </ul>
-            }
+            }@*
         </Authorized>
-    </AuthorizeView>
+    </AuthorizeView>*@
 </div>
 
 @code {
@@ -56,6 +56,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        /*
         var authState = await AuthProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -70,6 +71,43 @@
                 Console.WriteLine(userId);  
                 StateHasChanged();
             }
-        }
+        }*/
+
+        shifts = new List<ShiftDTO>
+        {
+            new ShiftDTO
+            {
+                Id = 1,
+                StartDateTime = DateTime.Parse("2024-12-09T08:00:00"), // Example: 9th December 2024 at 8:00 AM
+                EndDateTime = DateTime.Parse("2024-12-09T16:00:00"), // Example: 9th December 2024 at 4:00 PM
+                TypeOfShift = "Morning",
+                ShiftStatus = "Scheduled",
+                Description = "Morning shift for inventory management",
+                Location = "Warehouse A",
+                AssignedEmployees = new List<long> { 101, 102 }
+            },
+            new ShiftDTO
+            {
+                Id = 2,
+                StartDateTime = DateTime.Parse("2024-12-10T13:00:00"), // Example: 10th December 2024 at 1:00 PM
+                EndDateTime = DateTime.Parse("2024-12-10T21:00:00"), // Example: 10th December 2024 at 9:00 PM
+                TypeOfShift = "Afternoon",
+                ShiftStatus = "Open",
+                Description = "Afternoon shift for customer support",
+                Location = "Office B",
+                AssignedEmployees = new List<long> { 103 }
+            },
+            new ShiftDTO
+            {
+                Id = 3,
+                StartDateTime = DateTime.Parse("2024-12-11T22:00:00"), // Example: 11th December 2024 at 10:00 PM
+                EndDateTime = DateTime.Parse("2024-12-12T06:00:00"), // Example: 12th December 2024 at 6:00 AM
+                TypeOfShift = "Night",
+                ShiftStatus = "Confirmed",
+                Description = "Night shift for system maintenance",
+                Location = "Data Center C",
+                AssignedEmployees = new List<long> { 104, 105 }
+            }
+        };
     }
 }
