@@ -18,9 +18,9 @@ public class HttpShiftSwitchRequestService : IShiftSwitchRequestService
         await _httpClient.PostAsJsonAsync("ShiftSwitching/Request", shiftSwitchRequestDto);
     }
 
-    public async Task<IEnumerable<ShiftSwitchRequestDTO>> GetAllShiftSwitchRequestsAsync()
+    public async Task<List<ShiftSwitchRequestDTO>> GetAllShiftSwitchRequestsAsync()
     {
-        return await _httpClient.GetFromJsonAsync<IEnumerable<ShiftSwitchRequestDTO>>("ShiftSwitching/Request");
+        return await _httpClient.GetFromJsonAsync<List<ShiftSwitchRequestDTO>>("ShiftSwitching/Request");
     }
 
     public async Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByIdAsync(long Id)
