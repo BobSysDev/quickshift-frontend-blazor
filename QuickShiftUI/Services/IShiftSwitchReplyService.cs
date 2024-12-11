@@ -11,7 +11,7 @@ public interface IShiftSwitchReplyService
     Task<ShiftSwitchReplyDTO> UpdateShiftSwitchReplyAsync(long replyId, UpdateShiftSwitchReplyDTO shiftSwitchReplyDto);
     Task DeleteShiftSwitchReplyAsync(long replyId);
     
-    Task<ShiftSwitchReplyDTO> GetShiftSwitchReplyByEmployeeIdAsync(long employeeId);
+    Task <List<ShiftSwitchReplyDTO>> GetShiftSwitchReplyByEmployeeIdAsync(long employeeId);
 
     Task TargetRejectShiftSwitchReplyAsync(long requestId, long replyId);
     Task TargetAcceptShiftSwitchReplyAsync(long requestId, long replyId);
