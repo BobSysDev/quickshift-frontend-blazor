@@ -55,7 +55,7 @@
         
         if (!int.TryParse(workingNumberStr, out var workingNumber))
         {
-            errorLabel = "Working Number must be a number.";
+            errorLabel = "Working Number must be a whole number.";
             return;
         }
         authEmployee.WorkingNumber = workingNumber;

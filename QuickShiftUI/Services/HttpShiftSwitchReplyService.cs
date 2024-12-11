@@ -43,9 +43,9 @@ public class HttpShiftSwitchReplyService : IShiftSwitchReplyService
         await _httpClient.DeleteAsync($"ShiftSwitching/Reply/{Id}");
     }
 
-    public async Task<ShiftSwitchReplyDTO> GetShiftSwitchReplyByEmployeeIdAsync(long employeeId)
+    public async Task<List<ShiftSwitchReplyDTO>> GetShiftSwitchReplyByEmployeeIdAsync(long employeeId)
     {
-        return await _httpClient.GetFromJsonAsync<ShiftSwitchReplyDTO>($"Employee/{employeeId}/ShiftSwitching/Reply");
+        return await _httpClient.GetFromJsonAsync<List<ShiftSwitchReplyDTO>>($"Employee/{employeeId}/ShiftSwitching/Reply");
     }
 
     public async Task TargetRejectShiftSwitchReplyAsync(long requestId, long replyId)
