@@ -5,46 +5,62 @@
 @inject NavigationManager navMgr
 
 
-<h3>Login</h3>
+<div class="login-container">
+    <h3>Login</h3>
 
-<AuthorizeView>
-    <NotAuthorized Context="notAuthContext">
-        <EditForm Model="authEmployee" OnValidSubmit="LoginAsync">
-            <DataAnnotationsValidator/>
-            <ValidationSummary/>
-            
-            <div class="mt-4">
-                <label>Working Number:</label>
-                <InputNumber @bind-Value="authEmployee.WorkingNumber"/>
-            </div>
-            <div class="mt-4">
-                <label>Password:</label>
-                <InputText type="password" @bind-Value="authEmployee.Password"/>
-            </div>
-        
-            <button class="mt-4" type="submit">Login</button>
-        </EditForm>
+    <AuthorizeView>
+        <NotAuthorized Context="notAuthContext">
+            <EditForm Model="authEmployee" OnValidSubmit="LoginAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-        @if (!string.IsNullOrEmpty(errorLabel))
-        {
-            <label style="color: red"> @errorLabel </label>
-        }
-    </NotAuthorized>
-    
-    <Authorized>
-        <h3>Hello, @context.User.Identity.Name</h3>
-    </Authorized>
-    
-</AuthorizeView>
+                <div class="form-group">
+                    <label for="working-number">Working Number:</label>
+                    <InputText id="working-number" class="form-control" @bind-Value="workingNumberStr" />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <InputText id="password" type="password" class="form-control" @bind-Value="authEmployee.Password" />
+                </div>
+
+                <button type="submit">Login</button>
+            </EditForm>
+
+            @if (!string.IsNullOrEmpty(errorLabel))
+            {
+            <div class="error-label">@errorLabel</div>
+            }
+        </NotAuthorized>
+
+        <Authorized>
+            <div class="welcome-message">
+                <h3>Hello, @context.User.Identity.Name</h3>
+            </div>
+        </Authorized>
+    </AuthorizeView>
+</div>
+
 
 @code {
 
     private string errorLabel;
+    private string workingNumberStr;
+    
 
     private AuthEmployeeDTO authEmployee = new AuthEmployeeDTO();
 
     private async Task LoginAsync()
     {
+        
+        
+        if (!int.TryParse(workingNumberStr, out var workingNumber))
+        {
+            errorLabel = "Working Number must be a number.";
+            return;
+        }
+        authEmployee.WorkingNumber = workingNumber;
+        
+        
         Console.WriteLine(authEmployee.WorkingNumber + authEmployee.Password);
         if (authEmployee.WorkingNumber == 0 || string.IsNullOrEmpty(authEmployee.Password))
         {

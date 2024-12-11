@@ -11,41 +11,58 @@
         <DataAnnotationsValidator />
         <ValidationSummary />
 
-    <div class="mt-4">
-        <label>First Name:</label>
-        <InputText @bind-Value="newEmployee.FirstName" />
-    </div>
-    <div class="mt-4">
-        <label>Last Name:</label>
-        <InputText @bind-Value="newEmployee.LastName" />
-    </div>
-    <div class="mt-4">
-        <label>Working Number:</label>
-        <InputNumber @bind-Value="newEmployee.WorkingNumber" />
-    </div>
-    <div class="mt-4">
-        <label>Email:</label>
-        <InputText @bind-Value="newEmployee.Email" />
-    </div>
-    <div class="mt-4">
-        <label>Password:</label>
-        <InputText type="password" @bind-Value="newEmployee.Password" />
-    </div>
+        <div class="form-group">
+            <label for="first-name">First Name:</label>
+            <InputText id="first-name" class="form-control" @bind-Value="newEmployee.FirstName" />
+        </div>
 
-    @if (!string.IsNullOrEmpty(errorLabel))
-    {
-    <label class="mt-4" style="color: red"> @errorLabel </label> <br/>
-    }
-    
-    <button class="mt-4" type="submit">Register</button>
-</EditForm>
+        <div class="form-group">
+            <label for="last-name">Last Name:</label>
+            <InputText id="last-name" class="form-control" @bind-Value="newEmployee.LastName" />
+        </div>
+
+        <div class="form-group">
+            <label for="working-number">Working Number:</label>
+            <InputText id="working-number" class="form-control" @bind-Value="workingNumberStr" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <InputText id="email" class="form-control" @bind-Value="newEmployee.Email" />
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <InputText id="password" type="password" class="form-control" @bind-Value="newEmployee.Password" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorLabel))
+        {
+        <div class="alert">@errorLabel</div>
+        }
+
+        <button type="submit">Register</button>
+    </EditForm>
 </div>
+
 @code {
     private NewEmployeeDTO newEmployee = new NewEmployeeDTO();
     private string errorLabel;
+    private string workingNumberStr;
 
     private async Task HandleValidSubmit()
     {
+        
+        
+        if (!int.TryParse(workingNumberStr, out var workingNumber))
+        {
+            errorLabel = "Working Number must be a number.";
+            return;
+        }
+        newEmployee.WorkingNumber = workingNumber;
+        
+        
+        
         if (string.IsNullOrEmpty(newEmployee.FirstName) || string.IsNullOrEmpty(newEmployee.LastName) || newEmployee.WorkingNumber == 0 || string.IsNullOrEmpty(newEmployee.Email) || string.IsNullOrEmpty(newEmployee.Password))
         {
             errorLabel = "Please fill out all fields in the form.";
