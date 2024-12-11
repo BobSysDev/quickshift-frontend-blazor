@@ -17,9 +17,9 @@ public class HttpShiftService : IShiftService
         return await _httpClient.GetFromJsonAsync<ShiftDTO>($"Shift/{Id}");
     }
     
-    public async Task<IEnumerable<ShiftDTO>> GetAllShiftsAsync()
+    public async Task<List<ShiftDTO>> GetAllShiftsAsync()
     {
-        return await _httpClient.GetFromJsonAsync<IEnumerable<ShiftDTO>>($"Shift");
+        return await _httpClient.GetFromJsonAsync<List<ShiftDTO>>($"Shift");
     }
     
     public async Task AddShiftAsync(NewShiftDTO shiftDto)

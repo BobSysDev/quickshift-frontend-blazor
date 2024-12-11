@@ -1,0 +1,75 @@
+﻿@page "/MyShifts"
+@using DTOs.ShiftSwitching
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+@rendermode InteractiveServer
+@inject IShiftSwitchRequestService RequestService
+@inject NavigationManager Navigation
+@using System.Security.Claims
+@using DTOs.Shift
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="my-shifts-container">
+    <h3>My Shifts</h3>
+
+    @*<AuthorizeView>
+        <NotAuthorized>
+            <p>Please log in to view your shifts</p>
+        </NotAuthorized>
+
+        <Authorized Context="authorizedUser">*@
+            @if (requests == null)
+            {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+            }
+            else if (!requests.Any())
+            {
+                <p class="mt-4">No requests available.</p>
+            }
+            else
+            {
+                <ul class="list-group mt-4">
+                    @foreach (var ShiftSwitchRequestDTO in requests)
+                    {
+                        <li class="list-group-item">
+                            <a href="#" @onclick="() => RedirectToRequest(ShiftSwitchRequestDTO.Id)" @onclick:preventDefault="true">@ShiftSwitchRequestDTO.Id</a>
+                        </li>
+                    }
+                </ul>
+            }@*
+        </Authorized>
+    </AuthorizeView>*@
+</div>
+
+@code {
+    private List<ShiftSwitchRequestDTO> requests;
+
+    private void RedirectToRequest(long Id)
+    {
+        Console.WriteLine(Id);
+        Navigation.NavigateTo($"/Request/{Id}");
+    }
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+                requests = (await RequestService.GetAllShiftSwitchRequestsAsync()).ToList();
+                StateHasChanged();
+            }
+        }
+    }
+}
