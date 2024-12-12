@@ -39,11 +39,20 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         }
 
         SimpleEmployeeDTO employeeDto = JsonSerializer.Deserialize<SimpleEmployeeDTO>(userAsJson)!;
+
+        int role = 0;
+
+        if (employeeDto.IsManager)
+        {
+            role = (int) AccountRoles.Manager;
+        }
+        
         List<Claim> claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name, employeeDto.FirstName),
             new Claim(ClaimTypes.Surname, employeeDto.LastName),
             new Claim(ClaimTypes.NameIdentifier, employeeDto.WorkingNumber.ToString()),
+            new Claim(ClaimTypes.Role, role.ToString()),
             new Claim("EmployeeId", employeeDto.Id.ToString())
         };
         ClaimsIdentity identity = new ClaimsIdentity(claims, "apiauth");
@@ -82,11 +91,19 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         string serializedData = JsonSerializer.Serialize(simpleEmployeeDto);
         await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serializedData);
 
+        int role = 0;
+
+        if (simpleEmployeeDto.IsManager)
+        {
+            role = (int) AccountRoles.Manager;
+        }
+        
         List<Claim> claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name, simpleEmployeeDto.FirstName),
             new Claim(ClaimTypes.NameIdentifier, simpleEmployeeDto.WorkingNumber.ToString()),
             new Claim(ClaimTypes.Surname, simpleEmployeeDto.LastName),
+            new Claim(ClaimTypes.Role, role.ToString()),
             new Claim("EmployeeId", simpleEmployeeDto.Id.ToString())
         };
 
@@ -116,11 +133,19 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         string serializedData = JsonSerializer.Serialize(simpleEmployeeDto);
         await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serializedData);
 
+        int role = 0;
+
+        if (simpleEmployeeDto.IsManager)
+        {
+            role = (int) AccountRoles.Manager;
+        }
+        
         List<Claim> claims = new List<Claim>()
         {
             new Claim(ClaimTypes.Name, simpleEmployeeDto.FirstName),
             new Claim(ClaimTypes.NameIdentifier, simpleEmployeeDto.WorkingNumber.ToString()),
             new Claim(ClaimTypes.Surname, simpleEmployeeDto.LastName),
+            new Claim(ClaimTypes.Role, role.ToString()),
             new Claim("EmployeeId", simpleEmployeeDto.Id.ToString())
         };
         

@@ -11,5 +11,5 @@ public class EmployeeDTO
     public string Email { get; set; }
     public List<ShiftDTO> Shifts { get; set; }
     public string Password { get; set; }
-
+    public bool IsManager { get; set; }
 }
