@@ -40,13 +40,14 @@ public class HttpShiftSwitchRequestService : IShiftSwitchRequestService
         await _httpClient.DeleteAsync($"ShiftSwitching/Request/{Id}");
     }
 
-    public async Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByShiftIdAsync(long shiftId)
+    public async Task<List<ShiftSwitchRequestDTO>> GetAllShiftSwitchRequestsByShiftIdAsync(long shiftId)
     {
-        return await _httpClient.GetFromJsonAsync<ShiftSwitchRequestDTO>($"Shift/{shiftId}/ShiftSwitching/Request");
+        return await _httpClient.GetFromJsonAsync<List<ShiftSwitchRequestDTO>>($"Shift/{shiftId}/ShiftSwitching/Request");
     }
 
-    public async Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByEmployeeIdAsync(long employeeId)
+    public async Task<List<ShiftSwitchRequestDTO>> GetAllShiftSwitchRequestsByEmployeeIdAsync(long employeeId)
     {
-        return await _httpClient.GetFromJsonAsync<ShiftSwitchRequestDTO>($"Employee/{employeeId}/ShiftSwitching/Request");
+        return await _httpClient.GetFromJsonAsync<List<ShiftSwitchRequestDTO>>($"Employee/{employeeId}/ShiftSwitching/Request");
     }
+
 }

@@ -11,12 +11,12 @@
 <div class="my-shifts-container">
     <h3>My Shifts</h3>
 
-    @*<AuthorizeView>
+    <AuthorizeView>
         <NotAuthorized>
             <p>Please log in to view your shifts</p>
         </NotAuthorized>
 
-        <Authorized Context="authorizedUser">*@
+        <Authorized Context="authorizedUser">
             @if (shifts == null)
             {
                 <p class="mt-4">
@@ -37,9 +37,9 @@
                         </li>
                     }
                 </ul>
-            }@*
+            }
         </Authorized>
-    </AuthorizeView>*@
+    </AuthorizeView>
 </div>
 
 @code {
@@ -48,7 +48,7 @@
     private void RedirectToShift(long Id)
     {
         Console.WriteLine(Id);
-        Navigation.NavigateTo($"/shift/{Id}");
+        Navigation.NavigateTo($"/MyShifts/{Id}");
     }
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
@@ -73,7 +73,7 @@
             }
         }
 
-        shifts = new List<ShiftDTO>
+        /*shifts = new List<ShiftDTO>
         {
             new ShiftDTO
             {
@@ -108,6 +108,6 @@
                 Location = "Data Center C",
                 AssignedEmployees = new List<long> { 104, 105 }
             }
-        };
+        };*/
     }
 }

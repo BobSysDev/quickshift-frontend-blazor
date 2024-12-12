@@ -12,6 +12,6 @@ public interface IShiftSwitchRequestService
     Task<ShiftSwitchRequestDTO> UpdateRequestAsync(long Id, UpdateShiftSwitchRequestDTO shiftSwitchRequestDto);
     Task DeleteShiftSwitchRequestAsync(long Id);
     
-    Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByShiftIdAsync(long shiftId);
-    Task<ShiftSwitchRequestDTO> GetShiftSwitchRequestByEmployeeIdAsync(long employeeId);
+    Task<List<ShiftSwitchRequestDTO>> GetAllShiftSwitchRequestsByShiftIdAsync(long shiftId);
+    Task<List<ShiftSwitchRequestDTO>> GetAllShiftSwitchRequestsByEmployeeIdAsync(long employeeId);
 }
