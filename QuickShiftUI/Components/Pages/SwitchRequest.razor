@@ -64,9 +64,8 @@
             {
                 <li class="list-group-item">
                     <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
-                    <button style="float:right">Select</button>
+                    <span style="float:right">@ShiftDTO.StartDateTime </span>
                     <span style=" float:right">@ShiftDTO.EndDateTime </span>
-                    <span style="float:right">@ShiftDTO.StartDateTime - </span>
                 </li>
             }
         </ul>
