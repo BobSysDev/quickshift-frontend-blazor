@@ -91,7 +91,7 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         string serializedData = JsonSerializer.Serialize(simpleEmployeeDto);
         await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serializedData);
 
-        int role = 0;
+        int role = (int) AccountRoles.Employee;
 
         if (simpleEmployeeDto.IsManager)
         {
