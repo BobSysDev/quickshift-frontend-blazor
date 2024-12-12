@@ -3,6 +3,7 @@
 @using DTOs.ShiftSwitching
 @using QuickShiftUI.Services
 @inject IShiftService ShiftService
+@inject IShiftSwitchRequestService RequestService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
 
@@ -10,7 +11,7 @@
 
 <h4 class="mt-4">Shift to receive</h4>
 
-@* Shift of another employee details *@
+@* Request shift details *@
 @if (shift != null)
 {
     <div class="card mt-4">
@@ -36,12 +37,14 @@
                 <span>@shift.Description</span>
             </p>
         </div>
-
     </div>
 }
 
+<h4>Timeframes for switch</h4>
+
 <h4 class="mt-4">Choose shift</h4>
-@* Offered shift details *@
+
+@* Select shift for switch *@
 
 <div>
     @if (myShifts == null)
@@ -78,9 +81,10 @@
 
 
 @code {
-    private List<ShiftDTO> myShifts;
     [Parameter] public long Id { get; set; }
+    public ShiftSwitchRequestDTO? request { get; set; }
     public ShiftDTO? shift { get; set; }
+    private List<ShiftDTO> myShifts;
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
     private int loggedInUserId;
@@ -95,11 +99,11 @@
     {
         try
         {
-            shift = await ShiftService.GetShiftByIdAsync(Id);
+            request = await RequestService.GetShiftSwitchRequestByIdAsync(Id);
         }
         catch
         {
-            Navigation.NavigateTo("/SwitchShifts");
+            Navigation.NavigateTo("/AllRequests");
         }
     }
     protected override async Task OnInitializedAsync()
