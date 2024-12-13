@@ -1,4 +1,5 @@
 ﻿@page "/SwitchRequest/{Id:long}"
+@using DTOs
 @using DTOs.Shift
 @using DTOs.ShiftSwitching
 @using QuickShiftUI.Services
@@ -40,7 +41,10 @@
     </div>
 }
 
-<h4>Timeframes for switch</h4>
+<h4>Switch details</h4>
+<div>
+    <p>@request.Details</p>
+</div>
 
 <h4 class="mt-4">Choose shift</h4>
 
@@ -57,18 +61,18 @@
     {
         <p class="mt-4">No shifts available.</p>
     }
-    else
+    else if (shift.StartDateTime>=timeFrame.StartDate && shift.EndDateTime<=timeFrame.EndDate) 
     {
-        <ul class="list-group mt-4">
+        <InputSelect @bind-Value=newReply.TargetShiftId class="list-group mt-4">
             @foreach (var ShiftDTO in myShifts)
             {
-                <li class="list-group-item">
-                    <a href="#" @onclick="() => RedirectToShift(ShiftDTO.Id)" @onclick:preventDefault="true">@ShiftDTO.TypeOfShift</a>
-                    <span style="float:right">@ShiftDTO.StartDateTime </span>
-                    <span style=" float:right">@ShiftDTO.EndDateTime </span>
-                </li>
+                <option value="@ShiftDTO.Id">@ShiftDTO.TypeOfShift</option>
             }
-        </ul>
+        </InputSelect>
+    }
+    else
+    {
+        <p class="mt-4">No shifts available within the timeframe of the request.</p>
     }
 </div>
 
@@ -82,7 +86,9 @@
 @code {
     [Parameter] public long Id { get; set; }
     public ShiftSwitchRequestDTO? request { get; set; }
+    public NewShiftSwitchReplyDTO newReply { get; set; }
     public ShiftDTO? shift { get; set; }
+    public ShiftSwitchRequestTimeframeDTO timeFrame { get; set; }
     private List<ShiftDTO> myShifts;
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }

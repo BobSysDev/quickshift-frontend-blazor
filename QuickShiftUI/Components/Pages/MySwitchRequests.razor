@@ -19,6 +19,8 @@
         </NotAuthorized>
 
         <Authorized Context="authorizedUser">
+            <button @onclick="RedirectToCreateRequest">Create Request</button>
+            
             @if (requests == null)
             {
                 <p class="mt-4">
@@ -35,7 +37,7 @@
                     @foreach (var requestDto in requests)
                     {
                         <li class="list-group-item">
-                            <a href="#" @onclick="() => RedirectToRequest(requestDto.Id)" @onclick:preventDefault="true">@GetShiftTypeByRequest(requestDto)</a> 
+                            <a href="#" @onclick="() => RedirectToRequest(requestDto.Id)" @onclick:preventDefault="true">@GetShiftTypeByRequest(requestDto)</a>
                         </li>
                     }
                 </ul>
@@ -52,6 +54,11 @@
     {
         Console.WriteLine(Id);
         Navigation.NavigateTo($"/SwitchRequest/{Id}");
+    }
+    
+    private void RedirectToCreateRequest()
+    {
+        Navigation.NavigateTo($"/CreateSwitchRequest");
     }
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }

@@ -61,7 +61,7 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         return new AuthenticationState(claimsPrincipal);
     }
 
-    public async Task Register(string firstName, string lastName, int workingNumber, string email, string password)
+    public async Task Register(string firstName, string lastName, int workingNumber, string email, string password, bool isManager)
     {
         var newEmployee = new NewEmployeeDTO
         {
@@ -69,7 +69,8 @@ public class SimpleAuthProvider : AuthenticationStateProvider
             LastName = lastName,
             WorkingNumber = workingNumber,
             Email = email,
-            Password = password
+            Password = password,
+            IsManager = isManager
         };
 
         HttpResponseMessage response = await httpClient.PostAsJsonAsync("/Auth/register", newEmployee);

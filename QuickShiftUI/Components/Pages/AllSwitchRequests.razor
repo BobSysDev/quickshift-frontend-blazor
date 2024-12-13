@@ -19,6 +19,10 @@
         </NotAuthorized>
 
         <Authorized Context="authorizedUser">
+            
+            <button @onclick="RedirectToCreateRequest">Create Request</button>
+            
+            @* TODO display only requests within the timeframe *@
             @if (requests == null)
             {
                 <p class="mt-4">
@@ -53,6 +57,11 @@
     {
         Console.WriteLine(Id);
         Navigation.NavigateTo($"/SwitchRequest/{Id}");
+    }
+    
+    private void RedirectToCreateRequest()
+    {
+        Navigation.NavigateTo($"/CreateSwitchRequest");
     }
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
