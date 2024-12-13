@@ -1,6 +1,7 @@
 ﻿@page "/CreateSwitchRequest"
 @using System.Security.Claims
 @using System.Text.Json
+@using DTOs
 @using DTOs.Shift
 @using DTOs.ShiftSwitching
 @using QuickShiftUI.Services
@@ -9,6 +10,8 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
+@using System.Text.Json;
+@using Microsoft.JSInterop;
 
 
 <div class="card mt-4">
@@ -70,7 +73,7 @@
                 <div class="alert">@errorLabel</div>
             }
 
-            <button type="submit">Accept</button>
+            <button type="submit">Create request</button>
 
         </EditForm>
     </div>
@@ -82,6 +85,8 @@
     private NewShiftSwitchRequestTimeframeDTO newShiftSwitchRequestTimeframeDTO = new NewShiftSwitchRequestTimeframeDTO();
     private List<ShiftDTO> shifts;
 
+    private readonly HttpClient httpClient;
+    private readonly IJSRuntime jsRuntime;
     private string errorLabel;
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
@@ -113,6 +118,25 @@
             Details = details,
             TimeframeDtos = timeframeDtos
         };
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync("/Auth/register", newShiftSwitchRequest);
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception(content);
+        }
+
+        ShiftSwitchRequestDTO shiftSwitchRequestDTO = JsonSerializer.Deserialize<ShiftSwitchRequestDTO>(content, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+        if (shiftSwitchRequestDTO is null)
+        {
+            throw new Exception("DTO returned was null");
+        }
+
+        string serializedData = JsonSerializer.Serialize(shiftSwitchRequestDTO);
+        await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serializedData);
+        
     } /* TODO make it actually create request */
 
 

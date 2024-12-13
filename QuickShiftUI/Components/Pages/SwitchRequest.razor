@@ -93,12 +93,7 @@
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
     private int loggedInUserId;
-
-    private void RedirectToShift(long Id)
-    {
-        Console.WriteLine(Id);
-        Navigation.NavigateTo($"/MyShifts/{Id}");
-    }
+    
     
     protected override async Task OnParametersSetAsync()
     {
