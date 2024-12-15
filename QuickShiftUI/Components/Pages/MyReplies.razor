@@ -4,6 +4,7 @@
 @using QuickShiftUI.Services
 @rendermode InteractiveServer
 @inject IShiftSwitchReplyService ShiftSwitchReplyService
+@inject IShiftService ShiftService
 @inject NavigationManager Navigation
 @using System.Security.Claims
 @using DTOs
@@ -12,44 +13,52 @@
 <div class="my-shifts-container">
     <h3>My Replies</h3>
 
-    @*<AuthorizeView>
+    <AuthorizeView>
         <NotAuthorized>
             <p>Please log in to view your shifts</p>
         </NotAuthorized>
 
-        <Authorized Context="authorizedUser">*@
-            @if (replies == null)
+        <Authorized Context="authorizedUser">
+    @if (replies == null)
+    {
+        <p class="mt-4">
+            <em>Loading...</em>
+        </p>
+    }
+    else if (!replies.Any())
+    {
+        <p class="mt-4">No replies available.</p>
+    }
+    else
+    {
+        <ul class="list-group mt-4">
+            @foreach (var shiftSwitchReplyDTO in replies)
             {
-                <p class="mt-4">
-                    <em>Loading...</em>
-                </p>
+                <li class="list-group-item">
+                    <p>Replying to Employee @shiftSwitchReplyDTO.RequestId</p>
+                    <a href="#" @onclick="() => RedirectToReply(shiftSwitchReplyDTO.Id)" @onclick:preventDefault="true">@shiftSwitchReplyDTO.Details</a>
+                    <p>@(GetRepliesTitles(shiftSwitchReplyDTO))</p>
+                </li>
             }
-            else if (!replies.Any())
-            {
-                <p class="mt-4">No replies available.</p>
-            }
-            else
-            {
-                <ul class="list-group mt-4">
-                    @foreach (var ShiftSwitchReplyDTO in replies)
-                    {
-                        <li class="list-group-item">
-                            <a href="#" @onclick="() => RedirectToShift(ShiftSwitchReplyDTO.Id)" @onclick:preventDefault="true">@ShiftSwitchReplyDTO.Details</a>
-                        </li>
-                    }
-                </ul>
-            }@*
+        </ul>
+    }
         </Authorized>
-    </AuthorizeView>*@
+    </AuthorizeView>
 </div>
 
 @code {
     private List<ShiftSwitchReplyDTO> replies;
 
-    private void RedirectToShift(long Id)
+    private void RedirectToReply(long Id)
     {
         Console.WriteLine(Id);
         Navigation.NavigateTo($"/reply/{Id}");
+    }
+
+    protected async Task<string> GetRepliesTitles(ShiftSwitchReplyDTO shiftReply)
+    {
+        var shift = await ShiftService.GetShiftByIdAsync(shiftReply.TargetShiftId);
+        return shift?.Description;
     }
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
@@ -57,7 +66,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        
         var authState = await AuthProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -69,43 +77,12 @@
                 loggedInUserId = userId;
                 replies = (await ShiftSwitchReplyService.GetShiftSwitchReplyByEmployeeIdAsync(userId)).ToList();
                 Console.WriteLine(replies.Any());
-                Console.WriteLine(userId);  
+                Console.WriteLine(userId);
                 StateHasChanged();
             }
         }
 
-        replies ??= new List<ShiftSwitchReplyDTO>
-        {
-            new ShiftSwitchReplyDTO
-            {
-                Id = 1,
-                RequestId = 1001,
-                TargetEmployeeId = 101,
-                TargetShiftId = 201,
-                Details = "Switch with John for morning shift.",
-                OriginAccepted = true,
-                TargetAccepted = false
-            },
-            new ShiftSwitchReplyDTO
-            {
-                Id = 2,
-                RequestId = 1002,
-                TargetEmployeeId = 102,
-                TargetShiftId = 202,
-                Details = "Switch with Alex for afternoon shift.",
-                OriginAccepted = false,
-                TargetAccepted = true
-            },
-            new ShiftSwitchReplyDTO
-            {
-                Id = 3,
-                RequestId = 1003,
-                TargetEmployeeId = 103,
-                TargetShiftId = 203,
-                Details = "Switch with Sam for night shift.",
-                OriginAccepted = true,
-                TargetAccepted = true
-            }
-        };
+        
     }
+
 }

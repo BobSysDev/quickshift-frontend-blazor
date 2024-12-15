@@ -4,14 +4,22 @@
 @inject NavigationManager NavMgr
 <PageTitle>Home</PageTitle>
 <div class="home-container">
-        <h1 class="display-4">Welcome to QuickShift!</h1>
+    <h1 class="display-4">Welcome to QuickShift!</h1>
+
+    <AuthorizeView>
+        <Authorized>
+
         <p class="lead">Manage your shifts and employees efficiently.</p>
+        </Authorized>
+        <NotAuthorized>
         <hr class="my-4">
         <p>Get started by logging in or creating a new account.</p>
         <p class="lead">
             <a class="btn btn-primary btn-lg" href="/login" role="button">Login</a>
             <a class="btn btn-secondary btn-lg" href="/createAccount" role="button">Create Account</a>
         </p>
+        </NotAuthorized>
+    </AuthorizeView>
 </div>
 
 

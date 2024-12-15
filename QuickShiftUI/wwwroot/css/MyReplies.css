@@ -1,0 +1,32 @@
+.my-shifts-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  color: #000000;
+}
+.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border: 1px solid #6c757d;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: #f8f9fa;
+  color: #000000;
+  transition: background-color 0.3s;
+}
+.list-group-item:hover {
+  background-color: #e2e6ea;
+}
+.list-group-item a {
+  color: #000000;
+  text-decoration: none;
+}
+.list-group-item a:hover {
+  color: #007bff;
+}
