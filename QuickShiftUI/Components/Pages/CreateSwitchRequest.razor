@@ -82,7 +82,11 @@
 
 @code {
     private NewShiftSwitchRequestDTO newShiftSwitchRequest = new NewShiftSwitchRequestDTO();
-    private NewShiftSwitchRequestTimeframeDTO newShiftSwitchRequestTimeframeDTO = new NewShiftSwitchRequestTimeframeDTO();
+    private NewShiftSwitchRequestTimeframeDTO newShiftSwitchRequestTimeframeDTO = new NewShiftSwitchRequestTimeframeDTO()
+    {
+        StartDate = DateTime.Today,
+        EndDate = DateTime.Today.AddDays(7)
+    };
     private List<ShiftDTO> shifts;
 
     private readonly HttpClient httpClient;
