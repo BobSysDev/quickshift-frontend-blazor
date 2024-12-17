@@ -40,7 +40,7 @@ public class SimpleAuthProvider : AuthenticationStateProvider
 
         SimpleEmployeeDTO employeeDto = JsonSerializer.Deserialize<SimpleEmployeeDTO>(userAsJson)!;
 
-        int role = 0;
+        int role = (int) AccountRoles.Employee;
 
         if (employeeDto.IsManager)
         {
@@ -122,6 +122,9 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         {
             throw new Exception(content);
         }
+        
+        Console.WriteLine("Printing the content: "+content);
+        
         SimpleEmployeeDTO? simpleEmployeeDto = JsonSerializer.Deserialize<SimpleEmployeeDTO>(content, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
@@ -134,12 +137,14 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         string serializedData = JsonSerializer.Serialize(simpleEmployeeDto);
         await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serializedData);
 
-        int role = 0;
+        int role = (int) AccountRoles.Employee;
 
         if (simpleEmployeeDto.IsManager)
         {
             role = (int) AccountRoles.Manager;
         }
+        
+        Console.WriteLine("SimpleAuth is setting the role to:"+ role);
         
         List<Claim> claims = new List<Claim>()
         {

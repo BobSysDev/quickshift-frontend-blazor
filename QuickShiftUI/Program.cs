@@ -12,6 +12,8 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<IShiftService, HttpShiftService>();
 builder.Services.AddScoped<IShiftSwitchRequestService, HttpShiftSwitchRequestService>();
 builder.Services.AddScoped<IShiftSwitchReplyService, HttpShiftSwitchReplyService>();
+builder.Services.AddScoped<IEmployeeService, HttpEmployeeService>();
+
 
 builder.Services.AddScoped<AuthenticationStateProvider, SimpleAuthProvider>();
 // builder.Services.AddScoped<SimpleAuthProvider>(); 

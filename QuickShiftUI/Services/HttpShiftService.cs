@@ -29,7 +29,9 @@ public class HttpShiftService : IShiftService
 
     public async Task<ShiftDTO> UpdateShiftAsync(long Id, NewShiftDTO shiftDto)
     {
-        HttpResponseMessage response = await _httpClient.PatchAsJsonAsync($"Shift/{Id}", shiftDto);
+        HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"Shift/{Id}", shiftDto);
+        Console.WriteLine("Olek penis");
+        Console.WriteLine(response.StatusCode);
         ShiftDTO responseDTO = JsonSerializer.Deserialize<ShiftDTO>(await response.Content.ReadAsStringAsync());
         return responseDTO;
     }

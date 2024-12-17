@@ -1,0 +1,84 @@
+﻿@page "/ManageShifts/{ShiftId:long}"
+@using DTOs.Shift
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Edit Shift</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <p>You must be a manager to edit shifts.</p>
+    </NotAuthorized>
+
+    <Authorized Context="authorizedUser">
+        @if (shift == null)
+        {
+            <p class="mt-4"><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="form-group">
+                <label for="shiftType">Shift Type</label>
+                <input type="text" class="form-control" id="shiftType" @bind="shift.TypeOfShift" />
+            </div>
+
+            <div class="form-group">
+                <label for="shiftStatus">Shift Status</label>
+                <input type="text" class="form-control" id="shiftStatus" @bind="shift.ShiftStatus" />
+            </div>
+
+            <div class="form-group">
+                <label for="startDateTime">Start Date & Time</label>
+                <input type="datetime-local" class="form-control" id="startDateTime" @bind="shift.StartDateTime" />
+            </div>
+
+            <div class="form-group">
+                <label for="endDateTime">End Date & Time</label>
+                <input type="datetime-local" class="form-control" id="endDateTime" @bind="shift.EndDateTime" />
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" class="form-control" id="description" @bind="shift.Description" />
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" class="form-control" id="location" @bind="shift.Location" />
+            </div>
+
+            <button @onclick="SaveShiftChanges" class="btn btn-primary mt-3">Save Changes</button>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] public long ShiftId { get; set; }
+    private NewShiftDTO shift;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var existingShift = await ShiftService.GetShiftByIdAsync(ShiftId);
+
+        shift = new NewShiftDTO
+        {
+            StartDateTime = existingShift.StartDateTime,
+            EndDateTime = existingShift.EndDateTime,
+            TypeOfShift = existingShift.TypeOfShift,
+            ShiftStatus = existingShift.ShiftStatus,
+            Description = existingShift.Description,
+            Location = existingShift.Location
+        };
+    }
+
+    private async Task SaveShiftChanges()
+    {
+        Console.WriteLine("Attempting to save.");
+        await ShiftService.UpdateShiftAsync(ShiftId, shift);
+        Console.WriteLine("Saved.");
+        Navigation.NavigateTo("/ManageShifts");
+    }
+}

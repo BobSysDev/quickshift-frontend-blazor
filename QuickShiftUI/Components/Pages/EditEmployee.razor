@@ -1,0 +1,84 @@
+﻿@page "/ManageEmployees/{Id:long}"
+@using DTOs
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Edit Employee</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <p>You must be a manager to edit employee information.</p>
+    </NotAuthorized>
+
+    <Authorized Context="authorizedUser">
+        @if (employee == null)
+        {
+            <p class="mt-4"><em>Loading...</em></p>
+        }
+        else
+        {
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" class="form-control" id="firstName" @bind="employee.FirstName" />
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" class="form-control" id="lastName" @bind="employee.LastName" />
+            </div>
+
+            <div class="form-group">
+                <label for="workingNumber">Working Number</label>
+                <input type="number" class="form-control" id="workingNumber" @bind="employee.WorkingNumber" />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" @bind="employee.Email" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" @bind="employee.Password" />
+            </div>
+
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="isManager" @bind="employee.IsManager" />
+                <label class="form-check-label" for="isManager">Is Manager</label>
+            </div>
+
+            <button @onclick="SaveEmployeeChanges" class="btn btn-primary mt-3">Save Changes</button>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] public long Id { get; set; }
+    private NewEmployeeDTO employee;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var existingEmployee = await EmployeeService.GetEmployeeByIdAsync(Id);
+
+        employee = new NewEmployeeDTO
+        {
+            FirstName = existingEmployee.FirstName,
+            LastName = existingEmployee.LastName,
+            WorkingNumber = existingEmployee.WorkingNumber,
+            Email = existingEmployee.Email,
+            Password = existingEmployee.Password,
+            IsManager = existingEmployee.IsManager
+        };
+    }
+
+    private async Task SaveEmployeeChanges()
+    {
+        Console.WriteLine("Attempting to save employee changes.");
+        await EmployeeService.UpdateEmployeeAsync(Id, employee);
+        Console.WriteLine("Employee saved.");
+        Navigation.NavigateTo("/ManageEmployees");
+    }
+}
