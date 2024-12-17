@@ -77,7 +77,7 @@
         try
         {
 
-            await ((SimpleAuthProvider)AuthProvider).Register(newEmployee.FirstName, newEmployee.LastName, newEmployee.WorkingNumber, newEmployee.Email, newEmployee.Password, newEmployee.IsManager);
+            await ((SimpleAuthProvider)AuthProvider).RegisterSomeoneElse(newEmployee.FirstName, newEmployee.LastName, newEmployee.WorkingNumber, newEmployee.Email, newEmployee.Password, newEmployee.IsManager);
             navMgr.NavigateTo("Login");
         }
         catch (Exception e)

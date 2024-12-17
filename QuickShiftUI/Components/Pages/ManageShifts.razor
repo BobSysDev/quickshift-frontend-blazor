@@ -4,10 +4,10 @@
 @inject IShiftService ShiftService
 @inject NavigationManager Navigation
 @using System.Security.Claims
+@using QuickShiftUI.Components.Auth
 @using QuickShiftUI.Services
 @inject AuthenticationStateProvider AuthProvider
 
-<h3>Manage Shifts</h3>
 
 <AuthorizeView>
     <NotAuthorized>
@@ -21,9 +21,13 @@
         }
         else
         {
+            <button @onclick="NavigateToCreateShift">Create New Shift</button>
+
             @if (shifts == null)
             {
-                <p class="mt-4"><em>Loading...</em></p>
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
             }
             else if (!shifts.Any())
             {
@@ -57,16 +61,16 @@
 
         if (user.Identity.IsAuthenticated)
         {
-            // malo by fungovat ked ne tak toto bude problem xd
-            var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
+            var roleClaim = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
             Console.WriteLine(roleClaim);
-            isManager = (roleClaim == "1");
+            isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
 
             if (isManager)
             {
                 shifts = await ShiftService.GetAllShiftsAsync();
             }
         }
+
         StateHasChanged();
     }
 
@@ -74,4 +78,10 @@
     {
         Navigation.NavigateTo($"/ManageShifts/{id}");
     }
+
+    private void NavigateToCreateShift()
+    {
+        Navigation.NavigateTo("/CreateShift");
+    }
+
 }

@@ -4,6 +4,7 @@
 @inject IEmployeeService EmployeeService
 @inject NavigationManager Navigation
 @using System.Security.Claims
+@using QuickShiftUI.Components.Auth
 @using QuickShiftUI.Services
 @inject AuthenticationStateProvider AuthProvider
 
@@ -23,7 +24,9 @@
         {
             @if (employees == null)
             {
-                <p class="mt-4"><em>Loading...</em></p>
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
             }
             else if (!employees.Any())
             {
@@ -36,7 +39,7 @@
                     {
                         <li class="list-group-item">
                             <a href="#" @onclick="() => EditEmployee(employee.Id)" @onclick:preventDefault="true">
-                                (@employee.WorkingNumber) @employee.FirstName @employee.LastName 
+                                (@employee.WorkingNumber) @employee.FirstName @employee.LastName
                             </a>
                         </li>
                     }
@@ -61,27 +64,29 @@
         {
             var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
             Console.WriteLine(roleClaim);
-            isManager = (roleClaim == "1");
+            isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
 
             if (isManager)
             {
                 employees = await EmployeeService.GetAllEmployeesAsync();
+
+                employees.Sort((dto1, dto2) =>
+                {
+                    if (dto1.WorkingNumber > dto2.WorkingNumber)
+                    {
+                        return 1;
+                    }
+
+                    if (dto1.WorkingNumber == dto2.WorkingNumber)
+                    {
+                        return 0;
+                    }
+
+                    return -1;
+                });
             }
-            employees.Sort((dto1, dto2) =>
-            {
-                if (dto1.WorkingNumber > dto2.WorkingNumber)
-                {
-                    return 1;
-                }
-
-                if (dto1.WorkingNumber == dto2.WorkingNumber)
-                {
-                    return 0;
-                }
-
-                return -1;
-            });
         }
+
         StateHasChanged();
     }
 
@@ -89,5 +94,5 @@
     {
         Navigation.NavigateTo($"/ManageEmployees/{id}");
     }
-    
+
 }

@@ -112,6 +112,28 @@ public class SimpleAuthProvider : AuthenticationStateProvider
         ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
     }
+    
+    public async Task<string> RegisterSomeoneElse(string firstName, string lastName, int workingNumber, string email, string password, bool isManager)
+    {
+        var newEmployee = new NewEmployeeDTO
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            WorkingNumber = workingNumber,
+            Email = email,
+            Password = password,
+            IsManager = isManager
+        };
+
+        HttpResponseMessage response = await httpClient.PostAsJsonAsync("/Auth/register", newEmployee);
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new Exception(content);
+        }
+
+        return "Account created successfully";
+    }
 
     public async Task Login(int workingNumber, string password)
     {

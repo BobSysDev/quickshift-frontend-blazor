@@ -1,0 +1,106 @@
+﻿@page "/CreateShift"
+@using DTOs.Shift
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+
+@using QuickShiftUI.Components.Auth
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Create Shift</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <p>You must be a manager to create shifts.</p>
+    </NotAuthorized>
+
+    <Authorized Context="authorizedUser">
+        @if (!isManager)
+        {
+            <p>You are not authorized to create shifts.</p>
+        }
+        else
+        {
+            <EditForm Model="newShift" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-group">
+                    <label for="shiftType">Shift Type</label>
+                    <InputText id="shiftType" class="form-control" @bind-Value="newShift.TypeOfShift" />
+                </div>
+
+                <div class="form-group">
+                    <label for="shiftStatus">Shift Status</label>
+                    <InputText id="shiftStatus" class="form-control" @bind-Value="newShift.ShiftStatus" />
+                </div>
+
+                <div class="form-group">
+                    <label for="startDateTime">Start Date & Time</label>
+                    <InputDate id="startDateTime" class="form-control" @bind-Value="newShift.StartDateTime" />
+                </div>
+
+                <div class="form-group">
+                    <label for="endDateTime">End Date & Time</label>
+                    <InputDate id="endDateTime" class="form-control" @bind-Value="newShift.EndDateTime" />
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <InputText id="description" class="form-control" @bind-Value="newShift.Description" />
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <InputText id="location" class="form-control" @bind-Value="newShift.Location" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorLabel))
+                {
+                    <div class="alert alert-danger mt-3">@errorLabel</div>
+                }
+
+                <button type="submit" class="btn btn-primary mt-3">Create Shift</button>
+            </EditForm>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private NewShiftDTO newShift = new NewShiftDTO
+    {
+        StartDateTime = DateTime.Now,
+        EndDateTime = DateTime.Now.AddHours(1)
+    };
+
+    private bool isManager = false;
+    private string errorLabel;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var roleClaim = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            isManager = roleClaim == ((int)AccountRoles.Manager).ToString();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await ShiftService.AddShiftAsync(newShift);
+            Navigation.NavigateTo("/ManageShifts");
+        }
+        catch (Exception ex)
+        {
+            errorLabel = $"Error creating shift: {ex.Message}";
+        }
+    }
+}
