@@ -37,7 +37,7 @@
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" class="form-control" id="email" @bind="employee.Email" />
+                <input type="text" class="form-control" id="email" @bind="employee.Email" />
             </div>
 
             <div class="form-group">
@@ -49,9 +49,13 @@
                 <input type="checkbox" class="form-check-input" id="isManager" @bind="employee.IsManager" />
                 <label class="form-check-label" for="isManager">Is Manager</label>
             </div>
+            <div class="form-group">
 
-            <button @onclick="SaveEmployeeChanges" class="btn btn-primary mt-3">Save Changes</button>
-        }
+                <button @onclick="SaveEmployeeChanges" class="btn btn-primary mt-3">Save Changes</button>
+        
+                <button class="btn btn-secondary mt-4" @onclick="BackToEmployees">Return</button>
+            </div>
+            }
     </Authorized>
 </AuthorizeView>
 
@@ -69,16 +73,35 @@
             LastName = existingEmployee.LastName,
             WorkingNumber = existingEmployee.WorkingNumber,
             Email = existingEmployee.Email,
-            Password = existingEmployee.Password,
+            Password = "",
             IsManager = existingEmployee.IsManager
         };
+        Console.WriteLine(employee.FirstName);
+        Console.WriteLine(employee.LastName);
+        Console.WriteLine(employee.WorkingNumber);
+        Console.WriteLine(employee.Email);
+        Console.WriteLine(employee.Password);
+        Console.WriteLine(employee.IsManager);
     }
 
     private async Task SaveEmployeeChanges()
     {
         Console.WriteLine("Attempting to save employee changes.");
+        Console.WriteLine(employee.FirstName);
+        Console.WriteLine(employee.LastName);
+        Console.WriteLine(employee.WorkingNumber);
+        Console.WriteLine(employee.Email);
+        Console.WriteLine(employee.Password);
+        Console.WriteLine(employee.IsManager);
+
         await EmployeeService.UpdateEmployeeAsync(Id, employee);
         Console.WriteLine("Employee saved.");
+        Navigation.NavigateTo("/ManageEmployees");
+    }
+    
+    
+    private void BackToEmployees()
+    {
         Navigation.NavigateTo("/ManageEmployees");
     }
 }
