@@ -17,32 +17,32 @@
         <NotAuthorized>
             <p>Please log in to view requests</p>
         </NotAuthorized>
+        @* TODO display only requests within the timeframe *@
 
         <Authorized Context="authorizedUser">
-            
+
             <button @onclick="RedirectToCreateRequest">Create Request</button>
-            
-            @* TODO display only requests within the timeframe *@
+
             @if (requests == null)
             {
-                <p class="mt-4">
-                    <em>Loading...</em>
-                </p>
+            <p class="mt-4">
+                <em>Loading...</em>
+            </p>
             }
             else if (!requests.Any())
             {
-                <p class="mt-4">No requests available.</p>
+            <p class="mt-4">No requests available.</p>
             }
             else
             {
-                <ul class="list-group mt-4">
-                    @foreach (var requestDto in requests)
-                    {
-                        <li class="list-group-item">
-                            <a href="#" @onclick="() => RedirectToRequest(requestDto.Id)" @onclick:preventDefault="true">@GetShiftTypeByRequest(requestDto)</a>
-                        </li>
-                    }
-                </ul>
+            <ul class="list-group mt-4">
+                @foreach (var requestDto in requests)
+                {
+                <li class="list-group-item">
+                    <a href="#" @onclick="() => RedirectToRequest(requestDto.Id)" @onclick:preventDefault="true">@GetShiftTypeByRequest(requestDto)</a>
+                </li>
+                }
+            </ul>
             }
         </Authorized>
     </AuthorizeView>
@@ -56,7 +56,7 @@
     private void RedirectToRequest(long Id)
     {
         Console.WriteLine(Id);
-        Navigation.NavigateTo($"/SwitchRequest/{Id}");
+        Navigation.NavigateTo($"/MySwitchRequests/{Id}");
     }
     
     private void RedirectToCreateRequest()

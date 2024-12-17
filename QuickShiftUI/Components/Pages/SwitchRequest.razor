@@ -1,111 +1,92 @@
-﻿@page "/SwitchRequest/{Id:long}"
+﻿@page "/MySwitchRequests/{Id:long}"
 @using DTOs
 @using DTOs.Shift
 @using DTOs.ShiftSwitching
 @using QuickShiftUI.Services
-@inject IShiftService ShiftService
 @inject IShiftSwitchRequestService RequestService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
 
-<h3>Switch Request</h3>
+<h3>My Switch Requests</h3>
 
-<h4 class="mt-4">Shift to receive</h4>
-
-@* Request shift details *@
-@if (shift != null)
+@if (requests == null)
 {
-    <div class="card mt-4">
-        <div class="card-header">
-            <h4>@shift.TypeOfShift</h4>
-        </div>
-
-        <div class="card-body">
-            <p><b>Employee assigned: </b><span>@shift.AssignedEmployees</span></p>
-            <p>
-                <b>Start time: </b><span>@shift.StartDateTime</span>
-                <br/>
-                <b>End time: </b><span>@shift.EndDateTime</span>
-            </p>
-
-            <p>
-                <b>Location: </b> <span>@shift.Location</span>
-            </p>
-
-            <p>
-                <b>Shift description:</b>
-                <br>
-                <span>@shift.Description</span>
-            </p>
-        </div>
-    </div>
+    <p class="mt-4">
+        <em>Loading...</em>
+    </p>
 }
-
-<h4>Switch details</h4>
-<div>
-    <p>@request.Details</p>
-</div>
-
-<h4 class="mt-4">Choose shift</h4>
-
-@* Select shift for switch *@
-
-<div>
-    @if (myShifts == null)
+else if (!requests.Any())
+{
+    <p class="mt-4">No switch requests available.</p>
+}
+else
+{
+    @foreach (var request in requests)
     {
-        <p class="mt-4">
-            <em>Loading...</em>
-        </p>
-    }
-    else if (!myShifts.Any())
-    {
-        <p class="mt-4">No shifts available.</p>
-    }
-    else if (shift.StartDateTime>=timeFrame.StartDate && shift.EndDateTime<=timeFrame.EndDate) 
-    {
-        <InputSelect @bind-Value=newReply.TargetShiftId class="list-group mt-4">
-            @foreach (var ShiftDTO in myShifts)
-            {
-                <option value="@ShiftDTO.Id">@ShiftDTO.TypeOfShift</option>
-            }
-        </InputSelect>
-    }
-    else
-    {
-        <p class="mt-4">No shifts available within the timeframe of the request.</p>
-    }
-</div>
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4>Request ID: @request.Id</h4>
+            </div>
 
-@* Confirm *@
-<div class="mt-4">
-    <button>Confrim</button>
-    <button>Reject</button>
-</div>
+            <div class="card-body">
+                <p>
+                    <b>Origin Employee ID:</b> <span>@request.OriginEmployeeId</span>
+                </p>
+                <p>
+                    <b>Origin Shift ID:</b> <span>@request.OriginShiftId</span>
+                </p>
 
+                <p>
+                    <b>Details:</b>
+                    <br/>
+                    <span>@request.Details</span>
+                </p>
+
+                @if (request.TimeframeDtos != null && request.TimeframeDtos.Any())
+                {
+                    <p>
+                        <b>Timeframes:</b>
+                        <ul>
+                            @foreach (var timeframe in request.TimeframeDtos)
+                            {
+                                <li>
+                                    From @timeframe.StartDate.ToString("g") to @timeframe.EndDate.ToString("g")
+                                </li>
+                            }
+                        </ul>
+                    </p>
+                }
+
+                @if (request.ReplyDtos != null && request.ReplyDtos.Any())
+                {
+                    <p>
+                        <b>Replies:</b>
+                        <ul>
+                            @foreach (var reply in request.ReplyDtos)
+                            {
+                                <li>
+                                    Reply ID: @reply.Id, Target Shift ID: @reply.TargetShiftId
+                                </li>
+                            }
+                        </ul>
+                    </p>
+                }
+                else
+                {
+                    <p>No replies yet.</p>
+                }
+            </div>
+        </div>
+    }
+}
 
 @code {
     [Parameter] public long Id { get; set; }
-    public ShiftSwitchRequestDTO? request { get; set; }
-    public NewShiftSwitchReplyDTO newReply { get; set; }
-    public ShiftDTO? shift { get; set; }
-    public ShiftSwitchRequestTimeframeDTO timeFrame { get; set; }
-    private List<ShiftDTO> myShifts;
+    private List<ShiftSwitchRequestDTO>? requests;
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
     private int loggedInUserId;
-    
-    
-    protected override async Task OnParametersSetAsync()
-    {
-        try
-        {
-            request = await RequestService.GetShiftSwitchRequestByIdAsync(Id);
-        }
-        catch
-        {
-            Navigation.NavigateTo("/AllRequests");
-        }
-    }
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthProvider.GetAuthenticationStateAsync();
@@ -117,7 +98,7 @@
             if (int.TryParse(userIdClaim, out int userId))
             {
                 loggedInUserId = userId;
-                myShifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
+                requests = (await RequestService.GetAllShiftSwitchRequestsByEmployeeIdAsync(userId)).ToList();
                 StateHasChanged();
             }
         }

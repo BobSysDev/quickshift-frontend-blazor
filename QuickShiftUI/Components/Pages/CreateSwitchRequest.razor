@@ -1,6 +1,5 @@
 ﻿@page "/CreateSwitchRequest"
 @using System.Security.Claims
-@using System.Text.Json
 @using DTOs
 @using DTOs.Shift
 @using DTOs.ShiftSwitching
@@ -10,9 +9,7 @@
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
-@using System.Text.Json;
-@using Microsoft.JSInterop;
-
+@inject IJSRuntime JSRuntime
 
 <div class="card mt-4">
     <div class="card-header">
@@ -20,8 +17,8 @@
     </div>
     <div class="card-body">
         <EditForm Model="newShiftSwitchRequest" OnValidSubmit="HandleValidSubmit">
-            <DataAnnotationsValidator/>
-            <ValidationSummary/>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
             <h4>Pick a shift for switch</h4>
 
@@ -37,60 +34,49 @@
             }
             else
             {
-                <InputSelect @bind-Value=newShiftSwitchRequest.OriginShiftId class="list-group mt-4">
-                    @foreach (var ShiftDTO in shifts)
+                <InputSelect @bind-Value="newShiftSwitchRequest.OriginShiftId" class="form-control mt-4">
+                    @foreach (var shift in shifts)
                     {
-                        <option value="@ShiftDTO.Id">@ShiftDTO.TypeOfShift</option>
+                        <option value="@shift.Id">@shift.TypeOfShift</option>
                     }
                 </InputSelect>
             }
 
-
             <h4>Select timeframe</h4>
-
             <div class="form-group">
                 <label for="start-date">Start date of timeframe:</label>
                 <InputDate ParsingErrorMessage="Must be a date" id="start-date" class="form-control"
-                           @bind-Value="newShiftSwitchRequestTimeframeDTO.StartDate"/>
+                           @bind-Value="startDate" />
             </div>
 
             <div class="form-group">
                 <label for="end-date">End date of timeframe:</label>
                 <InputDate ParsingErrorMessage="Must be a date" id="end-date" class="form-control"
-                           @bind-Value="newShiftSwitchRequestTimeframeDTO.EndDate"/>
+                           @bind-Value="endDate" />
             </div>
 
-
             <h4>Request details</h4>
-
             <div class="form-group">
                 <label for="details">Details:</label>
-                <InputTextArea id="details" class="form-control" @bind-Value="newShiftSwitchRequest.Details"/>
+                <InputTextArea id="details" class="form-control" @bind-Value="newShiftSwitchRequest.Details" />
             </div>
 
             @if (!string.IsNullOrEmpty(errorLabel))
             {
-                <div class="alert">@errorLabel</div>
+                <div class="alert alert-danger mt-3">@errorLabel</div>
             }
 
-            <button type="submit">Create request</button>
-
+            <button type="submit" class="btn btn-primary mt-3">Create request</button>
         </EditForm>
     </div>
 </div>
 
-
 @code {
     private NewShiftSwitchRequestDTO newShiftSwitchRequest = new NewShiftSwitchRequestDTO();
-    private NewShiftSwitchRequestTimeframeDTO newShiftSwitchRequestTimeframeDTO = new NewShiftSwitchRequestTimeframeDTO()
-    {
-        StartDate = DateTime.Today,
-        EndDate = DateTime.Today.AddDays(7)
-    };
     private List<ShiftDTO> shifts;
+    private DateTime startDate = DateTime.Today;
+    private DateTime endDate = DateTime.Today.AddDays(7);
 
-    private readonly HttpClient httpClient;
-    private readonly IJSRuntime jsRuntime;
     private string errorLabel;
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
@@ -108,59 +94,38 @@
             {
                 loggedInUserId = userId;
                 shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
-                StateHasChanged();
             }
         }
     }
 
-    private async Task CreateRequest(long originEmployeeId, long originShiftId, string details, List<ShiftSwitchRequestTimeframeDTO>? timeframeDtos)
-    {
-        var newShiftSwitchRequest = new NewShiftSwitchRequestDTO()
-        {
-            OriginEmployeeId = originEmployeeId,
-            OriginShiftId = originShiftId,
-            Details = details,
-            TimeframeDtos = timeframeDtos
-        };
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync("/Auth/register", newShiftSwitchRequest);
-        string content = await response.Content.ReadAsStringAsync();
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new Exception(content);
-        }
-
-        ShiftSwitchRequestDTO shiftSwitchRequestDTO = JsonSerializer.Deserialize<ShiftSwitchRequestDTO>(content, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-        if (shiftSwitchRequestDTO is null)
-        {
-            throw new Exception("DTO returned was null");
-        }
-
-        string serializedData = JsonSerializer.Serialize(shiftSwitchRequestDTO);
-        await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serializedData);
-        
-    } /* TODO make it actually create request */
-
-
     private async Task HandleValidSubmit()
     {
-        if (string.IsNullOrEmpty(newShiftSwitchRequest.Details) || newShiftSwitchRequest.OriginShiftId == 0)
+        // Input validation
+        if (newShiftSwitchRequest.OriginShiftId == 0 || string.IsNullOrEmpty(newShiftSwitchRequest.Details))
         {
-            errorLabel = "Please fill out the form.";
+            errorLabel = "Please fill out all required fields.";
             return;
         }
 
+        // Add the timeframe DTO to the request
+        newShiftSwitchRequest.TimeframeDtos = new List<ShiftSwitchRequestTimeframeDTO>
+        {
+            new ShiftSwitchRequestTimeframeDTO
+            {
+                StartDate = startDate,
+                EndDate = endDate
+            }
+        };
+
         try
         {
-            await CreateRequest(newShiftSwitchRequest.OriginEmployeeId, newShiftSwitchRequest.OriginShiftId, newShiftSwitchRequest.Details, newShiftSwitchRequest.TimeframeDtos);
+            newShiftSwitchRequest.OriginEmployeeId = loggedInUserId;
+            await RequestService.CreateShiftSwitchRequestAsync(newShiftSwitchRequest);
             Navigation.NavigateTo("/MyRequests");
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            errorLabel = $"Error: {e.Message}";
+            errorLabel = $"Error creating request: {ex.Message}";
         }
     }
-
 }

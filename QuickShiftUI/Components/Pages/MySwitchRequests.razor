@@ -53,12 +53,12 @@
     private void RedirectToRequest(long Id)
     {
         Console.WriteLine(Id);
-        Navigation.NavigateTo($"/SwitchRequest/{Id}");
+        Navigation.NavigateTo($"/MySwitchRequests/{Id}");
     }
     
     private void RedirectToCreateRequest()
     {
-        Navigation.NavigateTo($"/CreateSwitchRequest");
+        Navigation.NavigateTo($"/CreateSwitchRequest/");
     }
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
