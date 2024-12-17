@@ -7,100 +7,101 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
 
-<h3>My Switch Requests</h3>
+<h3>Switch Request</h3>
 
-@if (requests == null)
-{
-    <p class="mt-4">
-        <em>Loading...</em>
-    </p>
-}
-else if (!requests.Any())
-{
-    <p class="mt-4">No switch requests available.</p>
-}
-else
-{
-    @foreach (var request in requests)
-    {
-        <div class="card mt-4">
-            <div class="card-header">
-                <h4>Request ID: @request.Id</h4>
-            </div>
+<AuthorizeView>
+    <NotAuthorized> </NotAuthorized>
 
-            <div class="card-body">
-                <p>
-                    <b>Origin Employee ID:</b> <span>@request.OriginEmployeeId</span>
-                </p>
-                <p>
-                    <b>Origin Shift ID:</b> <span>@request.OriginShiftId</span>
-                </p>
+    <Authorized>
 
-                <p>
-                    <b>Details:</b>
-                    <br/>
-                    <span>@request.Details</span>
-                </p>
+        @if (request != null)
 
-                @if (request.TimeframeDtos != null && request.TimeframeDtos.Any())
-                {
+        {
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Request ID: @request.Id</h4>
+                </div>
+
+                <div class="card-body">
                     <p>
-                        <b>Timeframes:</b>
-                        <ul>
-                            @foreach (var timeframe in request.TimeframeDtos)
-                            {
-                                <li>
-                                    From @timeframe.StartDate.ToString("g") to @timeframe.EndDate.ToString("g")
-                                </li>
-                            }
-                        </ul>
+                        <b>Origin Employee ID:</b> <span>@request.OriginEmployeeId</span>
                     </p>
-                }
-
-                @if (request.ReplyDtos != null && request.ReplyDtos.Any())
-                {
                     <p>
-                        <b>Replies:</b>
-                        <ul>
-                            @foreach (var reply in request.ReplyDtos)
-                            {
-                                <li>
-                                    Reply ID: @reply.Id, Target Shift ID: @reply.TargetShiftId
-                                </li>
-                            }
-                        </ul>
+                        <b>Origin Shift ID:</b> <span>@request.OriginShiftId</span>
                     </p>
-                }
-                else
-                {
-                    <p>No replies yet.</p>
-                }
+
+                    <p>
+                        <b>Details:</b>
+                        <br/>
+                        <span>@request.Details</span>
+                    </p>
+
+                    @if (request.TimeframeDtos != null && request.TimeframeDtos.Any())
+                    {
+                        <p>
+                            <b>Timeframes:</b>
+                            <ul>
+                                @foreach (var timeframe in request.TimeframeDtos)
+                                {
+                                    <li>
+                                        From @timeframe.StartDate.ToString("g") to @timeframe.EndDate.ToString("g")
+                                    </li>
+                                }
+                            </ul>
+                        </p>
+                    }
+
+                    @if (request.ReplyDtos != null && request.ReplyDtos.Any())
+                    {
+                        <p>
+                            <b>Replies:</b>
+                            <ul>
+                                @foreach (var reply in request.ReplyDtos)
+                                {
+                                    <li>
+                                        Reply ID: @reply.Id, Target Shift ID: @reply.TargetShiftId
+                                    </li>
+                                }
+                            </ul>
+                        </p>
+                    }
+                    else
+                    {
+                        <p>No replies yet.</p>
+                    }
+                </div>
             </div>
-        </div>
-    }
-}
+        }
+    </Authorized>
+
+</AuthorizeView>
 
 @code {
     [Parameter] public long Id { get; set; }
-    private List<ShiftSwitchRequestDTO>? requests;
+    private ShiftSwitchRequestDTO? request;
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
     private int loggedInUserId;
 
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            request = await RequestService.GetShiftSwitchRequestByIdAsync(Id);
+        }
+        catch
+        {
+            Navigation.NavigateTo("/allSwitchRequests");
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
+        base.OnInitialized();
+        var user = (await AuthProvider.GetAuthenticationStateAsync()).User;
+        if (!user.Identity.IsAuthenticated)
         {
-            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
-            if (int.TryParse(userIdClaim, out int userId))
-            {
-                loggedInUserId = userId;
-                requests = (await RequestService.GetAllShiftSwitchRequestsByEmployeeIdAsync(userId)).ToList();
-                StateHasChanged();
-            }
+            Navigation.NavigateTo("/allSwitchRequests");
         }
     }
 
