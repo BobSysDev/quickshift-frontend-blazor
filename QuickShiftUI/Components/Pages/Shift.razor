@@ -48,7 +48,9 @@
 
 
 </AuthorizeView>
-
+<p></p>
+<button class="btn-custom btn-primary-custom" @onclick="GoToCreateSwitchRequest">Create Switch Request</button>
+<p></p>
 <button class="btn btn-secondary mt-4" @onclick="BackToShifts">Return</button>
 
 @code {
@@ -84,5 +86,8 @@
     {
         Navigation.NavigateTo("/MyShifts");
     }
-
+    private void GoToCreateSwitchRequest()
+    {
+        Navigation.NavigateTo("/CreateSwitchRequest");
+    }
 }

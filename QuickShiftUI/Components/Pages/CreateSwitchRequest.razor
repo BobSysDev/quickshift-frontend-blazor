@@ -100,14 +100,12 @@
 
     private async Task HandleValidSubmit()
     {
-        // Input validation
         if (newShiftSwitchRequest.OriginShiftId == 0 || string.IsNullOrEmpty(newShiftSwitchRequest.Details))
         {
             errorLabel = "Please fill out all required fields.";
             return;
         }
 
-        // Add the timeframe DTO to the request
         newShiftSwitchRequest.TimeframeDtos = new List<ShiftSwitchRequestTimeframeDTO>
         {
             new ShiftSwitchRequestTimeframeDTO
