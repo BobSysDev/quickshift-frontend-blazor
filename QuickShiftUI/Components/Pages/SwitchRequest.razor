@@ -15,7 +15,6 @@
     <Authorized>
 
         @if (request != null)
-
         {
             <div class="card mt-4">
                 <div class="card-header">
@@ -32,7 +31,7 @@
 
                     <p>
                         <b>Details:</b>
-                        <br/>
+                        <br />
                         <span>@request.Details</span>
                     </p>
 
@@ -70,10 +69,24 @@
                         <p>No replies yet.</p>
                     }
                 </div>
+
+                <div class="card-footer">
+
+                    @if (request.OriginEmployeeId != loggedInUserId)
+                    {
+                        <button class="btn btn-primary" @onclick="GoToCreateReply">Create Reply</button>
+                    }
+                    else
+                    {
+                        <p class="text-danger">You cannot create a reply for your own request.</p>
+                    }                    
+                    
+                    <button class="btn btn-secondary" @onclick="GoBack">Back to All Requests</button>
+
+                </div>
             </div>
         }
     </Authorized>
-
 </AuthorizeView>
 
 @code {
@@ -103,6 +116,21 @@
         {
             Navigation.NavigateTo("/allSwitchRequests");
         }
+
+        var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+        if (int.TryParse(userIdClaim, out int userId))
+        {
+            loggedInUserId = userId;
+        }
     }
 
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/allSwitchRequests");
+    }
+
+    private void GoToCreateReply()
+    {
+        Navigation.NavigateTo($"/CreateSwitchReply/{Id}");
+    }
 }

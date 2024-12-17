@@ -1,0 +1,94 @@
+﻿@page "/CreateSwitchReply/{Id:long}"
+@using DTOs
+@using DTOs.Shift
+@using DTOs.ShiftSwitching
+@using QuickShiftUI.Services
+@inject IShiftSwitchRequestService RequestService
+@inject IShiftSwitchReplyService ReplyService
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h3>Create Reply for Request ID: @RequestId</h3>
+    </div>
+    <div class="card-body">
+        @if (request != null)
+        {
+            <EditForm Model="newReply" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
+
+                <h4>Reply Details</h4>
+                <div class="form-group">
+                    <label for="details">Details:</label>
+                    <InputTextArea id="details" class="form-control" @bind-Value="newReply.Details"/>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Create Reply</button>
+            </EditForm>
+        }
+        else
+        {
+            <p>Unable to find request details.</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public long Id { get; set; }
+    private NewShiftSwitchReplyDTO newReply = new NewShiftSwitchReplyDTO();
+    private List<ShiftDTO> shifts;
+    private string errorLabel;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+    private long RequestId => Id;
+    private ShiftSwitchRequestDTO? request;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+            }
+        }
+
+        request = await RequestService.GetShiftSwitchRequestByIdAsync(Id);
+
+        if (request == null || request.OriginEmployeeId == loggedInUserId)
+        {
+            Navigation.NavigateTo("allSwitchRequests");
+        }
+
+        shifts = await ShiftService.GetAllShiftsByUserIdAsync(request.OriginShiftId);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (newReply.TargetShiftId == 0 || string.IsNullOrEmpty(newReply.Details))
+        {
+            errorLabel = "Please fill out all required fields.";
+            return;
+        }
+
+        try
+        {
+            newReply.TargetEmployeeId = loggedInUserId;
+            await ReplyService.CreateShiftSwitchReplyAsync(RequestId, newReply);
+            Console.WriteLine("tu si");
+            Navigation.NavigateTo($"allSwitchRequests");
+        }
+        catch (Exception ex)
+        {
+            errorLabel = $"Error creating reply: {ex.Message}";
+        }
+    }
+}
