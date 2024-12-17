@@ -1,0 +1,133 @@
+﻿@page "/AssignShift"
+@using DTOs
+@using DTOs.Shift
+@inject IShiftService ShiftService
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+@using QuickShiftUI.Components.Auth
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Assign or Unassign Employee to Shift</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <p>You must be a manager to perform this action.</p>
+    </NotAuthorized>
+
+    <Authorized Context="authorizedUser">
+        @if (!isManager)
+        {
+            <p>You are not authorized to assign or unassign employees.</p>
+        }
+        else
+        {
+            <div class="form-group">
+                <label for="shiftSelect">Select Shift</label>
+                <InputSelect @bind-Value="selectedShiftId" id="shiftSelect" class="form-control">
+                    <option value="0">-- Select a Shift --</option>
+                    @foreach (var shift in shifts)
+                    {
+                        <option value="@shift.Id">@($"{shift.StartDateTime:yyyy-MM-dd HH:mm} - {shift.TypeOfShift}")</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group mt-3">
+                <label for="employeeSelect">Select Employee</label>
+                <InputSelect @bind-Value="selectedEmployeeId" id="employeeSelect" class="form-control">
+                    <option value="0">-- Select an Employee --</option>
+                    @foreach (var employee in employees)
+                    {
+                        <option value="@employee.Id">@($"{employee.WorkingNumber} - {employee.LastName}")</option>
+                    }
+                </InputSelect>
+            </div>
+
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <div class="alert alert-info mt-3">@message</div>
+            }
+
+            <div class="mt-3">
+                <p>
+                <button class="btn btn-primary me-2" @onclick="AssignEmployee" disabled="@IsActionDisabled">Assign</button></p>
+                <button class="btn btn-primary" @onclick="UnassignEmployee" disabled="@IsActionDisabled">Unassign</button>
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private List<ShiftDTO> shifts;
+    private List<EmployeeDTO> employees;
+
+    private long selectedShiftId;
+    private long selectedEmployeeId;
+
+    private bool isManager = false;
+    private string message;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var roleClaim = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            isManager = roleClaim == ((int)AccountRoles.Manager).ToString();
+
+            if (isManager)
+            {
+                shifts = await ShiftService.GetAllShiftsAsync();
+                employees = await EmployeeService.GetAllEmployeesAsync();
+            }
+        }
+    }
+
+    private bool IsActionDisabled => selectedShiftId == 0 || selectedEmployeeId == 0;
+
+    private async Task AssignEmployee()
+    {
+        try
+        {
+            var response = await ShiftService.AssignShiftToEmployeeAsync(selectedShiftId, selectedEmployeeId);
+            if (response.IsSuccessStatusCode)
+            {
+                message = "Employee successfully assigned to the shift.";
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                message = "Employee is already assigned to this shift.";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+        }
+    }
+
+    private async Task UnassignEmployee()
+    {
+        try
+        {
+            var response = await ShiftService.UnassignShiftFromEmployeeAsync(selectedShiftId, selectedEmployeeId);
+            if (response.IsSuccessStatusCode)
+            {
+                message = "Employee successfully unassigned from the shift.";
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                message = "Employee is not assigned to this shift.";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+        }
+    }
+}

@@ -11,4 +11,8 @@ public interface IShiftService
     Task DeleteShiftAsync(long Id);
     
     Task<List<ShiftDTO>> GetAllShiftsByUserIdAsync(long userId);
+    
+    Task<HttpResponseMessage> AssignShiftToEmployeeAsync(long shiftId, long employeeId);
+    Task<HttpResponseMessage> UnassignShiftFromEmployeeAsync(long shiftId, long employeeId);
+
 }

@@ -45,4 +45,15 @@ public class HttpShiftService : IShiftService
     {
         return await _httpClient.GetFromJsonAsync<List<ShiftDTO>>($"Shifts/Employee/{userId}");
     }
+    
+    public async Task<HttpResponseMessage> AssignShiftToEmployeeAsync(long shiftId, long employeeId)
+    {
+        return await _httpClient.PatchAsync($"/Shift/{shiftId}/Assign/{employeeId}", null);
+    }
+
+    public async Task<HttpResponseMessage> UnassignShiftFromEmployeeAsync(long shiftId, long employeeId)
+    {
+        return await _httpClient.PatchAsync($"/Shift/{shiftId}/Unassign/{employeeId}", null);
+    }
+
 }
