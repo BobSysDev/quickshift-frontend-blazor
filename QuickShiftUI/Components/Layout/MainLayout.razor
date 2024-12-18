@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@using QuickShiftUI.Components.Auth
+@inject AuthenticationStateProvider AuthProvider
 
 <div class="top-menu">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -26,21 +28,21 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/myReplies">My Replies</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/ManageShifts">Manage Shifts</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/ManageEmployees">Manage Employees</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/AssignShift">Assign Shifts</a>
-                </li>
-
-            </ul>
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/createAccount">Create Account</a>
-                </li>
+                @if (isManager)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ManageShifts">Manage Shifts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ManageEmployees">Manage Employees</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/AssignShift">Assign Shifts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/createAccount">Create Account</a>
+                    </li>
+                }
             </ul>
         </div>
     </nav>
@@ -79,3 +81,23 @@
         padding: 20px;
     }
 </style>
+
+@code
+{
+    private bool isManager = false;
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var roleClaim = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
+        }
+
+        StateHasChanged();
+    }
+}
