@@ -82,7 +82,7 @@
     private async Task LogoutAsync(){try
         {
             await ((SimpleAuthProvider)AuthProvider).Logout();
-            navMgr.NavigateTo("/");
+            navMgr.NavigateTo(navMgr.Uri, true);
         }
         catch (Exception e)
         {
