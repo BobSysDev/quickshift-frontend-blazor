@@ -6,6 +6,7 @@
 @using QuickShiftUI.Services
 @inject AuthenticationStateProvider AuthProvider
 
+<div class="create-account-container">
 <h3>Edit Employee</h3>
 
 <AuthorizeView>
@@ -45,9 +46,9 @@
                 <input type="password" class="form-control" id="password" @bind="employee.Password" />
             </div>
 
-            <div class="form-group form-check">
-                <input type="checkbox" class="form-check-input" id="isManager" @bind="employee.IsManager" />
+            <div class="form-group">
                 <label class="form-check-label" for="isManager">Is Manager</label>
+                <input type="checkbox" class="form-check-input" id="isManager" @bind="employee.IsManager"/>
             </div>
             <div class="form-group">
 
@@ -58,7 +59,7 @@
             }
     </Authorized>
 </AuthorizeView>
-
+</div>
 @code {
     [Parameter] public long Id { get; set; }
     private NewEmployeeDTO employee;
