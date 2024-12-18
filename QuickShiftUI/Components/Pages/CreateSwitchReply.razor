@@ -1,7 +1,6 @@
 ﻿@page "/CreateSwitchReply/{Id:long}"
 @using DTOs
 @using DTOs.Shift
-@using DTOs.ShiftSwitching
 @using QuickShiftUI.Services
 @inject IShiftSwitchRequestService RequestService
 @inject IShiftSwitchReplyService ReplyService
@@ -16,11 +15,23 @@
     <div class="card-body">
         @if (request != null)
         {
-            <EditForm Model="newReply" OnValidSubmit="HandleValidSubmit">
+            <EditForm Model="newReply" OnValidSubmit="@HandleValidSubmit">
                 <DataAnnotationsValidator/>
                 <ValidationSummary/>
 
+                <div class="form-group">
+                    <label for="shiftSelect">Select Shift</label>
+                    <InputSelect @bind-Value="newReply.TargetShiftId" id="shiftSelect" class="form-control">
+                        <option value="0">-- Select a Shift --</option>
+                        @foreach (var shift in shifts)
+                        {
+                            <option value="@shift.Id">@($"{shift.StartDateTime:yyyy-MM-dd HH:mm} - {shift.TypeOfShift}")</option>
+                        }
+                    </InputSelect>
+                </div>
+
                 <h4>Reply Details</h4>
+
                 <div class="form-group">
                     <label for="details">Details:</label>
                     <InputTextArea id="details" class="form-control" @bind-Value="newReply.Details"/>
@@ -38,6 +49,7 @@
 
 @code {
     [Parameter] public long Id { get; set; }
+
     private NewShiftSwitchReplyDTO newReply = new NewShiftSwitchReplyDTO();
     private List<ShiftDTO> shifts;
     private string errorLabel;
@@ -58,6 +70,8 @@
             if (int.TryParse(userIdClaim, out int userId))
             {
                 loggedInUserId = userId;
+                shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
+                StateHasChanged();
             }
         }
 
@@ -67,8 +81,6 @@
         {
             Navigation.NavigateTo("allSwitchRequests");
         }
-
-        shifts = await ShiftService.GetAllShiftsByUserIdAsync(request.OriginShiftId);
     }
 
     private async Task HandleValidSubmit()
@@ -83,8 +95,7 @@
         {
             newReply.TargetEmployeeId = loggedInUserId;
             await ReplyService.CreateShiftSwitchReplyAsync(RequestId, newReply);
-            Console.WriteLine("tu si");
-            Navigation.NavigateTo($"allSwitchRequests");
+            Navigation.NavigateTo($"/MyReplies");
         }
         catch (Exception ex)
         {

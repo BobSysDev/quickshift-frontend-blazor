@@ -35,10 +35,7 @@
             @foreach (var shiftSwitchReplyDTO in replies)
             {
                 <li class="list-group-item">
-                    <p>Replying to Employee @shiftSwitchReplyDTO.RequestId</p>
-                    <a href="#" @onclick="() => RedirectToReply(shiftSwitchReplyDTO.Id)" @onclick:preventDefault="true">@shiftSwitchReplyDTO.Details</a>
-                    <p>@(GetRepliesTitles(shiftSwitchReplyDTO))</p>
-                </li>
+                    <a href="#" @onclick="() => RedirectToReply(shiftSwitchReplyDTO.Id)" @onclick:preventDefault="true">@shiftSwitchReplyDTO.Details</a></li>
             }
         </ul>
     }
@@ -52,7 +49,7 @@
     private void RedirectToReply(long Id)
     {
         Console.WriteLine(Id);
-        Navigation.NavigateTo($"/reply/{Id}");
+        Navigation.NavigateTo($"/SwitchReply/{Id}");
     }
 
     protected async Task<string> GetRepliesTitles(ShiftSwitchReplyDTO shiftReply)
