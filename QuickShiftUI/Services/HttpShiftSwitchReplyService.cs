@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using DTOs;
 using DTOs.Shift;
+using QuickShiftUI.Components.Pages;
 
 namespace QuickShiftUI.Services;
 
@@ -70,7 +71,13 @@ public class HttpShiftSwitchReplyService : IShiftSwitchReplyService
 
     public async Task<List<ShiftDTO>> SwitchShiftsAsync(long requestId, long replyId)
     {
-        return await _httpClient.GetFromJsonAsync<List<ShiftDTO>>(
-            $"/ShiftSwitching/Request/{requestId}/Reply/{replyId}/Resolve");
+        var response = await _httpClient.PatchAsJsonAsync(
+            $"/ShiftSwitching/Request/{requestId}/Reply/{replyId}/Resolve", "");
+        if (response.IsSuccessStatusCode)
+        {
+            return JsonSerializer.Deserialize<List<ShiftDTO>>(await response.Content.ReadAsStringAsync());
+        }
+
+        throw new Exception("Oopsie");
     }
 }
