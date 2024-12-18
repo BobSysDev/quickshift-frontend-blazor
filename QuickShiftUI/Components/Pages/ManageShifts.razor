@@ -8,6 +8,7 @@
 @using QuickShiftUI.Services
 @inject AuthenticationStateProvider AuthProvider
 
+<div class="my-shifts-container">
 <h3>Manage Shifts</h3>
 
 <AuthorizeView>
@@ -48,6 +49,7 @@
         }
     </Authorized>
 </AuthorizeView>
+</div>
 
 @code {
     private List<ShiftDTO> shifts;

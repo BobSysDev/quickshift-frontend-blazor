@@ -9,6 +9,7 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject IJSRuntime JSRuntime
 
+<div class="my-shifts-container">
 <h3>Create Shift</h3>
 
 <AuthorizeView>
@@ -68,7 +69,7 @@
         }
     </Authorized>
 </AuthorizeView>
-
+</div>
 @code {
     private NewShiftDTO newShift = new NewShiftDTO
     {
