@@ -56,11 +56,10 @@
                             <b>Replies:</b>
                             <ul>
                                 @foreach (var reply in request.ReplyDtos)
-                                {
-                                    <li>
-                                        Reply ID: @reply.Id, Target Shift ID: @reply.TargetShiftId
-                                    </li>
-                                }
+                        {
+                        <li class="list-group-item">
+                            <a href="#" @onclick="() => RedirectToReply(reply.Id)" @onclick:preventDefault="true">@reply.Details</a></li>
+                        }
                             </ul>
                         </p>
                     }
@@ -136,5 +135,11 @@
     private void GoToCreateReply()
     {
         Navigation.NavigateTo($"/CreateSwitchReply/{Id}");
+    }
+    
+    private void RedirectToReply(long Id)
+    {
+        Console.WriteLine(Id);
+        Navigation.NavigateTo($"/SwitchReply/{Id}");
     }
 }
