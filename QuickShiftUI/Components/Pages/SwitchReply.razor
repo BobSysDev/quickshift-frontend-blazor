@@ -72,12 +72,12 @@
                     {
                         if (isCreatorOfRequest)
                         {
-                            <button class="btn btn-danger mt-4" @onclick="SwitchShifts">Switch Shifts</button>
-                            <button class="btn btn-warning mt-4" @onclick="CancelOriginSwitch">Cancel Shift Switch</button>
+                            <button class="btn btn-primary mt-4" @onclick="SwitchShifts">Switch Shifts</button>
+                            <button class="btn btn-danger mt-4" @onclick="CancelOriginSwitch">Cancel Shift Switch</button>
                         }
                         else if (reply.TargetEmployeeId == loggedInUserId)
                         {
-                            <button class="btn btn-warning mt-4" @onclick="CancelTargetSwitch">Cancel Shift Switch</button>
+                            <button class="btn btn-danger mt-4" @onclick="CancelTargetSwitch">Cancel Shift Switch</button>
                         }
                     }
                     else
