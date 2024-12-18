@@ -58,7 +58,7 @@
             <h4>Request details</h4>
             <div class="form-group">
                 <label for="details">Details:</label>
-                <InputTextArea id="details" class="form-control" @bind-Value="newShiftSwitchRequest.Details"/>
+                <InputTextArea id="details" maxlength="250" class="form-control" @bind-Value="newShiftSwitchRequest.Details"/>
             </div>
 
             @if (!string.IsNullOrEmpty(errorLabel))

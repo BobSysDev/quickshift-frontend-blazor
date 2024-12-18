@@ -30,12 +30,12 @@
 
                 <div class="form-group">
                     <label for="shiftType">Shift Type</label>
-                    <InputText id="shiftType" class="form-control" @bind-Value="newShift.TypeOfShift" />
+                    <InputText maxlength="250" id="shiftType" class="form-control" @bind-Value="newShift.TypeOfShift" />
                 </div>
 
                 <div class="form-group">
                     <label for="shiftStatus">Shift Status</label>
-                    <InputText id="shiftStatus" class="form-control" @bind-Value="newShift.ShiftStatus" />
+                    <InputText maxlength="250" id="shiftStatus" class="form-control" @bind-Value="newShift.ShiftStatus" />
                 </div>
 
                 <div class="form-group">
@@ -50,12 +50,12 @@
 
                 <div class="form-group">
                     <label for="description">Description</label>
-                    <InputText id="description" class="form-control" @bind-Value="newShift.Description" />
+                    <InputText maxlength="250" id="description" class="form-control" @bind-Value="newShift.Description" />
                 </div>
 
                 <div class="form-group">
                     <label for="location">Location</label>
-                    <InputText id="location" class="form-control" @bind-Value="newShift.Location" />
+                    <InputText maxlength="250" id="location" class="form-control" @bind-Value="newShift.Location" />
                 </div>
 
                 @if (!string.IsNullOrEmpty(errorLabel))
