@@ -16,7 +16,7 @@
     </NotAuthorized>
 
     <Authorized Context="authorizedUser">
-        @if (reply != null && targetShift != null)
+        @if (reply != null && targetShift != null && originShift != null)
         {
             <div class="card mt-4">
                 <div class="card-header">
@@ -65,7 +65,7 @@
                         }
                         else
                         {
-                            <p class="text-warning mt-4">You must the wait for the reply's author to accept.</p>
+                            <p class="text-warning mt-4">You must wait for the reply's author to accept.</p>
                         }
                     }
                     else if (reply.OriginAccepted && reply.TargetAccepted)
@@ -94,17 +94,31 @@
     </Authorized>
 </AuthorizeView>
 
+@if (showPopup && reply != null && targetShift != null && originShift != null)
+{
+    <div>
+        <h4>Shift Switch Successful</h4>
+        <p>
+            Shift <b>@($"{targetShift.TypeOfShift} (Date: {targetShift.StartDateTime:g})")</b>
+            switched with Shift <b>@($"{originShift.TypeOfShift} (Datet: {originShift.StartDateTime:g})")</b>.
+        </p>
+    </div>
+}
+
+
 <button class="btn btn-secondary mt-4" @onclick="GoBack">Return to My Replies</button>
 
 @code {
     [Parameter] public long Id { get; set; }
     private ShiftSwitchReplyDTO? reply;
     private ShiftDTO? targetShift;
+    private ShiftDTO? originShift;
     private long loggedInUserId;
     private ShiftSwitchRequestDTO? request;
     private bool isCreatorOfRequest;
     private bool originAcceptedDisabled = false;
     private bool targetAcceptedDisabled = false;
+    private bool showPopup = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -130,6 +144,7 @@
 
                 if (request != null)
                 {
+                    originShift = await ShiftService.GetShiftByIdAsync(request.OriginShiftId);
                     isCreatorOfRequest = request.OriginEmployeeId == loggedInUserId;
                 }
             }
@@ -145,6 +160,7 @@
 
     private void GoBack()
     {
+        showPopup = false;
         Navigation.NavigateTo("/MyReplies");
     }
 
@@ -188,13 +204,10 @@
     {
         try
         {
-            Console.WriteLine("reply este moze byt null");
             if (reply != null)
             {
-                Console.WriteLine("reply neni null");
-                var switchedShifts = await ReplyService.SwitchShiftsAsync(reply.RequestId, reply.Id);
-                Console.WriteLine("after switchshiftasync");
-                Navigation.NavigateTo("/MyReplies");
+                await ReplyService.SwitchShiftsAsync(reply.RequestId, reply.Id);
+                showPopup = true;
             }
         }
         catch (Exception ex)
@@ -238,5 +251,4 @@
             Console.WriteLine($"Error canceling target shift switch: {ex.Message}");
         }
     }
-
 }
