@@ -74,14 +74,18 @@
 
                     @if (request.OriginEmployeeId != loggedInUserId)
                     {
-                        <button class="btn btn-primary" @onclick="GoToCreateReply">Create Reply</button>
+                        <div class="row">
+                        <button class="btn btn-primary col-md mb-4 mb-md-0" @onclick="GoToCreateReply">Create Reply</button>
+                        <button class="btn btn-secondary col-md" @onclick="GoBack">Back to All Requests</button>
+                        </div>
                     }
                     else
                     {
-                        <p class="text-danger">You cannot create a reply for your own request.</p>
+                        <p class="text-danger mb-4">You cannot create a reply for your own request.</p>
+                        <button class="btn btn-secondary" @onclick="GoBack">Back to All Requests</button>
                     }                    
                     
-                    <button class="btn btn-secondary" @onclick="GoBack">Back to All Requests</button>
+                    
 
                 </div>
             </div>
