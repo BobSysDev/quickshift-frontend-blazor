@@ -54,14 +54,26 @@
                 </div>
 
                 <button @onclick="SaveShiftChanges" class="btn btn-primary mt-3">Save Changes</button>
+                <button class="btn btn-danger mt-3" @onclick="DeleteShift">Delete Shit</button>
+                <button class="btn btn-secondary mt-4" @onclick="BackToShifts">Go Back</button>
+
             }
         </Authorized>
     </AuthorizeView>
 </div>
 
+@if (showDeleteSuccessPopup)
+{
+<div class="alert alert-success mt-3">
+    Employee successfully deleted.
+</div>
+}
+
 @code {
     [Parameter] public long ShiftId { get; set; }
     private NewShiftDTO shift;
+    private bool showDeleteSuccessPopup;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,5 +97,16 @@
         Console.WriteLine("Saved.");
         Navigation.NavigateTo("/ManageShifts");
     }
-
+    
+    
+    private async Task DeleteShift()
+    {
+        await ShiftService.DeleteShiftAsync(ShiftId);
+        showDeleteSuccessPopup = true;
+        StateHasChanged();
+    }
+    private void BackToShifts()
+    {
+        Navigation.NavigateTo("/ManageShifts");
+    }
 }

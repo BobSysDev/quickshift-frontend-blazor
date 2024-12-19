@@ -9,7 +9,7 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject IJSRuntime JSRuntime
 
-<div class="my-announcements-container">
+<div class="create-account-container">
     <h3>Create Announcement</h3>
 
     <AuthorizeView>
@@ -30,12 +30,12 @@
 
                     <div class="form-group">
                         <label for="title">Title</label>
-                        <InputText maxlength="250" id="title" class="form-control" @bind-Value="newAnnouncement.Title"/>
+                        <InputText maxlength="255" id="title" class="form-control" @bind-Value="newAnnouncement.Title"/>
                     </div>
 
                     <div class="form-group">
                         <label for="body">Body</label>
-                        <InputTextArea maxlength="1000" id="body" class="form-control" @bind-Value="newAnnouncement.Body"/>
+                        <InputTextArea maxlength="255" id="body" class="form-control" @bind-Value="newAnnouncement.Body"/>
                     </div>
 
                     <div class="form-group">
@@ -107,6 +107,7 @@
             await AnnouncementService.AddAnnouncementAsync(newAnnouncement);
 
             Navigation.NavigateTo("/AllAnnouncements");
+            StateHasChanged();
         }
         catch (Exception ex)
         {
