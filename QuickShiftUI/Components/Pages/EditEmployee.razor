@@ -90,26 +90,14 @@
             Password = "",
             IsManager = existingEmployee.IsManager
         };
-        Console.WriteLine(employee.FirstName);
-        Console.WriteLine(employee.LastName);
-        Console.WriteLine(employee.WorkingNumber);
-        Console.WriteLine(employee.Email);
-        Console.WriteLine(employee.Password);
-        Console.WriteLine(employee.IsManager);
+        
     }
 
     private async Task SaveEmployeeChanges()
     {
-        Console.WriteLine("Attempting to save employee changes.");
-        Console.WriteLine(employee.FirstName);
-        Console.WriteLine(employee.LastName);
-        Console.WriteLine(employee.WorkingNumber);
-        Console.WriteLine(employee.Email);
-        Console.WriteLine(employee.Password);
-        Console.WriteLine(employee.IsManager);
+        
 
         await EmployeeService.UpdateEmployeeAsync(Id, employee);
-        Console.WriteLine("Employee saved.");
         Navigation.NavigateTo("/ManageEmployees");
     }
 

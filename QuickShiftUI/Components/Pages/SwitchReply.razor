@@ -155,7 +155,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading reply details: {ex.Message}");
             Navigation.NavigateTo("/MyReplies");
         }
     }
@@ -202,7 +201,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error accepting origin switch: {ex.Message}");
         }
     }
 
@@ -220,7 +218,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error accepting target switch: {ex.Message}");
         }
     }
 
@@ -236,7 +233,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error switching shifts: {ex.Message}");
         }
     }
 
@@ -254,7 +250,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error canceling shift switch: {ex.Message}");
         }
     }
 
@@ -272,7 +267,6 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error canceling target shift switch: {ex.Message}");
         }
     }
 
