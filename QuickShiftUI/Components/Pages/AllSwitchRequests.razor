@@ -20,9 +20,12 @@
         @* TODO display only requests within the timeframe *@
 
         <Authorized Context="authorizedUser">
-
-            <button @onclick="RedirectToCreateRequest">Create Request</button>
-
+            <p class="mt-4">
+                <button @onclick="RedirectToCreateRequest">Create Request</button>
+            </p>            
+            <p class="mt-4">
+                <button @onclick="RedirectToMyRequests">My Requests</button>
+            </p>
             @if (requests == null)
             {
             <p class="mt-4">
@@ -62,6 +65,11 @@
     private void RedirectToCreateRequest()
     {
         Navigation.NavigateTo($"/CreateSwitchRequest");
+    }
+    
+    private void RedirectToMyRequests()
+    {
+        Navigation.NavigateTo($"/MyRequests");
     }
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }

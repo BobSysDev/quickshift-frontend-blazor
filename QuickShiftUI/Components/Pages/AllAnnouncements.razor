@@ -19,7 +19,9 @@
         <Authorized>
             @if (isManager)
             {
-                <button @onclick="RedirectToCreateAnnouncement" class="btn btn-primary mb-3">Create Announcement</button>
+                <button @onclick="RedirectToCreateAnnouncement" class="btn btn-primary mb-3">Create Announcement</button>                
+                <button @onclick="Refresh" class="btn btn-primary mb-3">Refresh announcements</button>
+
             }
 
             @if (announcements == null)
@@ -61,6 +63,7 @@
                         </div>
                     }
                 </div>
+
             }
         </Authorized>
     </AuthorizeView>
@@ -85,12 +88,6 @@
     {
         var user = (await AuthProvider.GetAuthenticationStateAsync()).User;
 
-        if (!user.Identity.IsAuthenticated)
-        {
-            Navigation.NavigateTo("/Login");
-            return;
-        }
-
         var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
         var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
 
@@ -99,9 +96,24 @@
         {
             loggedInUserId = userId;
         }
+        
 
         announcements = (await AnnouncementService.GetAllAnnouncementsAsync()).ToList();
-        StateHasChanged();
+        announcements.Sort((dto1, dto2) =>
+        {
+            if (dto1.DateTimeOfPosting > dto2.DateTimeOfPosting)
+            {
+                return -1;
+            }
+
+            if (dto1.DateTimeOfPosting == dto2.DateTimeOfPosting)
+            {
+                return 0;
+            }
+
+            return 1;
+        });
+        
     }
 
     private void RedirectToCreateAnnouncement()
@@ -123,6 +135,27 @@
             Console.WriteLine($"Error deleting announcement: {ex.Message}");
         }
 
+        StateHasChanged();
+    }
+
+
+    private void Refresh()
+    {
+        announcements.Sort((dto1, dto2) =>
+        {
+            if (dto1.DateTimeOfPosting > dto2.DateTimeOfPosting)
+            {
+                return -1;
+            }
+
+            if (dto1.DateTimeOfPosting == dto2.DateTimeOfPosting)
+            {
+                return 0;
+            }
+
+            return 1;
+        });
+        
         StateHasChanged();
     }
 

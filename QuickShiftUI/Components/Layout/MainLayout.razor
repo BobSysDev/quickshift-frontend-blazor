@@ -10,11 +10,16 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
+                
+                
                 <li class="nav-item">
                     <a class="nav-link" href="/login">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/allSwitchRequests">All Switch Requests</a>
+                    <a class="nav-link" href="/AllAnnouncements">All Announcements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/allSwitchRequests">Switch Requests</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/myShifts">My Shifts</a>
@@ -22,11 +27,14 @@
                 @*<li class="nav-item">
                     <a class="nav-link" href="/AllRequests">All Requests</a>
                 </li>*@
-                <li class="nav-item">
-                    <a class="nav-link" href="/MyRequests">My Requests</a>
-                </li>
+                @* <li class="nav-item"> *@
+                @*     <a class="nav-link" href="/MyRequests">My Requests</a> *@
+                @* </li> *@
                 <li class="nav-item">
                     <a class="nav-link" href="/myReplies">My Replies</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/allEmployees">All Employees</a>
                 </li>
                 @if (isManager)
                 {
@@ -39,9 +47,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/AssignShift">Assign Shifts</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/AllAnnouncements">All Announcements</a>
-                    </li>
+
                     @* <li class="nav-item"> *@
                     @*     <a class="nav-link" href="/createAccount">Create Account</a> *@
                     @* </li> *@
