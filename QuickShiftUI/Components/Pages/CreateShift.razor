@@ -40,12 +40,12 @@
 
                 <div class="form-group">
                     <label for="startDateTime">Start Date & Time</label>
-                    <InputDate id="startDateTime" class="form-control" @bind-Value="newShift.StartDateTime" />
+                    <input type="datetime-local" class="form-control" id="startDateTime" @bind="newShift.StartDateTime" />
                 </div>
 
                 <div class="form-group">
                     <label for="endDateTime">End Date & Time</label>
-                    <InputDate id="endDateTime" class="form-control" @bind-Value="newShift.EndDateTime" />
+                    <input type="datetime-local" class="form-control" id="endDateTime" @bind="newShift.EndDateTime" />
                 </div>
 
                 <div class="form-group">
