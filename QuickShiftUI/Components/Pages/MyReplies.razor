@@ -48,7 +48,6 @@
 
     private void RedirectToReply(long Id)
     {
-        Console.WriteLine(Id);
         Navigation.NavigateTo($"/SwitchReply/{Id}");
     }
 
@@ -73,8 +72,6 @@
             {
                 loggedInUserId = userId;
                 replies = (await ShiftSwitchReplyService.GetShiftSwitchReplyByEmployeeIdAsync(userId)).ToList();
-                Console.WriteLine(replies.Any());
-                Console.WriteLine(userId);
                 StateHasChanged();
             }
         }

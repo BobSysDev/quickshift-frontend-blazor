@@ -65,7 +65,6 @@
         if (user.Identity.IsAuthenticated)
         {
             var roleClaim = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-            Console.WriteLine(roleClaim);
             isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
 
             if (isManager)

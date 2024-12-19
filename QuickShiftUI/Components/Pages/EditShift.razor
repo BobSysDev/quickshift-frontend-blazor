@@ -92,9 +92,7 @@
 
     private async Task SaveShiftChanges()
     {
-        Console.WriteLine("Attempting to save.");
         await ShiftService.UpdateShiftAsync(ShiftId, shift);
-        Console.WriteLine("Saved.");
         Navigation.NavigateTo("/ManageShifts");
     }
     
