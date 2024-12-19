@@ -56,8 +56,12 @@
                     {
                         <div class="alert">@errorLabel</div>
                     }
-
-                    <button type="submit">Register</button>
+                    <p>
+                        <button class="btn btn-secondary col-md" @onclick="GoBack">Back to All Employees</button>
+                    </p>
+                    <p>
+                        <button type="submit">Register</button>
+                    </p>
                 </EditForm>
             }
         </Authorized>
@@ -108,6 +112,12 @@
         {
             errorLabel = $"Error: {e.Message}";
         }
+    }
+    
+    
+    private void GoBack()
+    {
+        navMgr.NavigateTo($"/ManageEmployees");
     }
 
 }

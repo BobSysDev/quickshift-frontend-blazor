@@ -98,7 +98,7 @@
         }
         
 
-        announcements = (await AnnouncementService.GetAllAnnouncementsAsync()).ToList();
+        announcements = (await AnnouncementService.GetMostRecentAnnouncementsAsync(10)).ToList();
         announcements.Sort((dto1, dto2) =>
         {
             if (dto1.DateTimeOfPosting > dto2.DateTimeOfPosting)
