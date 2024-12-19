@@ -1,9 +1,10 @@
 ﻿@page "/MySwitchRequests/{Id:long}"
 @using DTOs
 @using DTOs.Shift
-@using DTOs.ShiftSwitching
 @using QuickShiftUI.Services
 @inject IShiftSwitchRequestService RequestService
+@inject IEmployeeService EmployeeService
+@inject IShiftService ShiftService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
 
@@ -13,20 +14,20 @@
     <NotAuthorized> </NotAuthorized>
 
     <Authorized>
-
         @if (request != null)
         {
             <div class="card mt-4">
                 <div class="card-header">
-                    <h4>Request ID: @request.Id</h4>
+                    <h4>Request Details</h4>
                 </div>
 
                 <div class="card-body">
                     <p>
-                        <b>Origin Employee ID:</b> <span>@request.OriginEmployeeId</span>
+                        <b>Origin Employee:</b> <span>@originEmployeeName</span>
                     </p>
                     <p>
-                        <b>Origin Shift ID:</b> <span>@request.OriginShiftId</span>
+                        <b>Origin Shift:</b> 
+                        <span>@originShiftDescription</span>
                     </p>
 
                     <p>
@@ -56,10 +57,13 @@
                             <b>Replies:</b>
                             <ul>
                                 @foreach (var reply in request.ReplyDtos)
-                        {
-                        <li class="list-group-item">
-                            <a href="#" @onclick="() => RedirectToReply(reply.Id)" @onclick:preventDefault="true">@reply.Details</a></li>
-                        }
+                                {
+                                    <li class="list-group-item">
+                                        <a href="#" @onclick="() => RedirectToReply(reply.Id)" @onclick:preventDefault="true">
+                                            @reply.Details
+                                        </a>
+                                    </li>
+                                }
                             </ul>
                         </p>
                     }
@@ -70,22 +74,18 @@
                 </div>
 
                 <div class="card-footer">
-
                     @if (request.OriginEmployeeId != loggedInUserId)
                     {
                         <div class="row">
-                        <button class="btn btn-primary col-md mb-4 mb-md-0" @onclick="GoToCreateReply">Create Reply</button>
-                        <button class="btn btn-secondary col-md" @onclick="GoBack">Back to All Requests</button>
+                            <button class="btn btn-primary col-md mb-4 mb-md-0" @onclick="GoToCreateReply">Create Reply</button>
+                            <button class="btn btn-secondary col-md" @onclick="GoBack">Back to All Requests</button>
                         </div>
                     }
                     else
                     {
                         <p class="text-danger mb-4">You cannot create a reply for your own request.</p>
                         <button class="btn btn-secondary" @onclick="GoBack">Back to All Requests</button>
-                    }                    
-                    
-                    
-
+                    }
                 </div>
             </div>
         }
@@ -95,6 +95,8 @@
 @code {
     [Parameter] public long Id { get; set; }
     private ShiftSwitchRequestDTO? request;
+    private string originEmployeeName = string.Empty;
+    private string originShiftDescription = string.Empty;
 
     [CascadingParameter] public Task<AuthenticationState> State { get; set; }
     private int loggedInUserId;
@@ -104,6 +106,10 @@
         try
         {
             request = await RequestService.GetShiftSwitchRequestByIdAsync(Id);
+            if (request != null)
+            {
+                await LoadAdditionalDetails();
+            }
         }
         catch
         {
@@ -127,6 +133,24 @@
         }
     }
 
+    private async Task LoadAdditionalDetails()
+    {
+        if (request != null)
+        {
+            var employee = await EmployeeService.GetEmployeeByIdAsync(request.OriginEmployeeId);
+            if (employee != null)
+            {
+                originEmployeeName = $"{employee.FirstName} {employee.LastName}";
+            }
+
+            var shift = await ShiftService.GetShiftByIdAsync(request.OriginShiftId);
+            if (shift != null)
+            {
+                originShiftDescription = $"{shift.StartDateTime:yyyy-MM-dd HH:mm} - {shift.TypeOfShift} @ {shift.Location}";
+            }
+        }
+    }
+
     private void GoBack()
     {
         Navigation.NavigateTo("/allSwitchRequests");
@@ -136,10 +160,9 @@
     {
         Navigation.NavigateTo($"/CreateSwitchReply/{Id}");
     }
-    
+
     private void RedirectToReply(long Id)
     {
-        Console.WriteLine(Id);
         Navigation.NavigateTo($"/SwitchReply/{Id}");
     }
 }

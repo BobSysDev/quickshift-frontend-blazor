@@ -10,56 +10,60 @@
 @inject AuthenticationStateProvider AuthProvider
 
 <div class="my-shifts-container">
-<h3>Assign or Unassign Employee to Shift</h3>
+    <h3>Assign or Unassign Employee to Shift</h3>
 
-<AuthorizeView>
-    <NotAuthorized>
-        <p>You must be a manager to perform this action.</p>
-    </NotAuthorized>
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>You must be a manager to perform this action.</p>
+        </NotAuthorized>
 
-    <Authorized Context="authorizedUser">
-        @if (!isManager)
-        {
-            <p>You are not authorized to assign or unassign employees.</p>
-        }
-        else
-        {
-            <div class="form-group">
-                <label for="shiftSelect">Select Shift</label>
-                <InputSelect @bind-Value="selectedShiftId" id="shiftSelect" class="form-control">
-                    <option value="0">-- Select a Shift --</option>
-                    @foreach (var shift in shifts)
-                    {
-                        <option value="@shift.Id">@($"{shift.StartDateTime:yyyy-MM-dd HH:mm} - {shift.TypeOfShift}")</option>
-                    }
-                </InputSelect>
-            </div>
-
-            <div class="form-group mt-3">
-                <label for="employeeSelect">Select Employee</label>
-                <InputSelect @bind-Value="selectedEmployeeId" id="employeeSelect" class="form-control">
-                    <option value="0">-- Select an Employee --</option>
-                    @foreach (var employee in employees)
-                    {
-                        <option value="@employee.Id">@($"{employee.WorkingNumber} - {employee.LastName}")</option>
-                    }
-                </InputSelect>
-            </div>
-
-            @if (!string.IsNullOrEmpty(message))
+        <Authorized Context="authorizedUser">
+            @if (!isManager)
             {
-                <div class="alert alert-info mt-3">@message</div>
+                <p>You are not authorized to assign or unassign employees.</p>
             }
+            else
+            {
+                <div class="form-group">
+                    <label for="shiftSelect">Select Shift</label>
+                    <InputSelect @bind-Value="selectedShiftId" id="shiftSelect" class="form-control">
+                        <option value="0">-- Select a Shift --</option>
+                        @foreach (var shift in shifts)
+                        {
+                            <option value="@shift.Id">@($"{shift.StartDateTime:yyyy-MM-dd HH:mm} - {shift.TypeOfShift}")</option>
+                        }
+                    </InputSelect>
+                </div>
 
-            <div class="mt-3">
-                <p>
-                <button class="btn btn-primary me-2" @onclick="AssignEmployee" disabled="@IsActionDisabled">Assign</button></p>
-                <button class="btn btn-primary" @onclick="UnassignEmployee" disabled="@IsActionDisabled">Unassign</button>
-            </div>
-        }
-    </Authorized>
-</AuthorizeView>
+                <div class="form-group mt-3">
+                    <label for="employeeSelect">Select Employee</label>
+                    <InputSelect @bind-Value="selectedEmployeeId" id="employeeSelect" class="form-control">
+                        <option value="0">-- Select an Employee --</option>
+                        @foreach (var employee in employees)
+                        {
+                            <option value="@employee.Id">@($"{employee.WorkingNumber} - {employee.LastName}")</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                @if (!string.IsNullOrEmpty(message))
+                {
+                    <div class="alert alert-success">
+                        @message
+                    </div>
+                }
+
+                <div class="mt-3">
+                    <p>
+                        <button class="btn btn-primary me-2" @onclick="AssignEmployee" disabled="@IsActionDisabled">Assign</button>
+                    </p>
+                    <button class="btn btn-primary" @onclick="UnassignEmployee" disabled="@IsActionDisabled">Unassign</button>
+                </div>
+            }
+        </Authorized>
+    </AuthorizeView>
 </div>
+
 @code {
     private List<ShiftDTO> shifts;
     private List<EmployeeDTO> employees;
@@ -131,4 +135,5 @@
             message = $"Error: {ex.Message}";
         }
     }
+
 }

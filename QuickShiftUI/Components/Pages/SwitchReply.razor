@@ -5,6 +5,7 @@
 @inject IShiftSwitchReplyService ReplyService
 @inject IShiftService ShiftService
 @inject IShiftSwitchRequestService ShiftSwitchRequestService
+@inject IEmployeeService EmployeeService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthProvider
 
@@ -25,25 +26,24 @@
 
                 <div class="card-body">
                     <p>
-                        <b>Reply ID: </b><span>@reply.Id</span>
+                        <b>Target Employee:</b> <span>@targetEmployeeName</span>
                     </p>
                     <p>
-                        <b>Request ID: </b><span>@reply.RequestId</span>
+                        <b>Target Shift:</b>
+                        <span>@targetShiftDescription</span>
                     </p>
                     <p>
-                        <b>Target Employee ID: </b><span>@reply.TargetEmployeeId</span>
+                        <b>Origin Shift:</b>
+                        <span>@originShiftDescription</span>
                     </p>
                     <p>
-                        <b>Target Shift ID: </b><span>@reply.TargetShiftId</span>
+                        <b>Details:</b> <span>@reply.Details</span>
                     </p>
                     <p>
-                        <b>Details: </b><span>@reply.Details</span>
+                        <b>Origin Accepted:</b> <span>@(reply.OriginAccepted ? "Yes" : "No")</span>
                     </p>
                     <p>
-                        <b>Origin Accepted: </b><span>@(reply.OriginAccepted ? "Yes" : "No")</span>
-                    </p>
-                    <p>
-                        <b>Target Accepted: </b><span>@(reply.TargetAccepted ? "Yes" : "No")</span>
+                        <b>Target Accepted:</b> <span>@(reply.TargetAccepted ? "Yes" : "No")</span>
                     </p>
 
                     @if (!reply.OriginAccepted)
@@ -100,11 +100,10 @@
         <h4>Shift Switch Successful</h4>
         <p>
             Shift <b>@($"{targetShift.TypeOfShift} (Date: {targetShift.StartDateTime:g})")</b>
-            switched with Shift <b>@($"{originShift.TypeOfShift} (Datet: {originShift.StartDateTime:g})")</b>.
+            switched with Shift <b>@($"{originShift.TypeOfShift} (Date: {originShift.StartDateTime:g})")</b>.
         </p>
     </div>
 }
-
 
 <button class="btn btn-secondary mt-4" @onclick="GoBack">Return to My Replies</button>
 
@@ -113,8 +112,12 @@
     private ShiftSwitchReplyDTO? reply;
     private ShiftDTO? targetShift;
     private ShiftDTO? originShift;
-    private long loggedInUserId;
     private ShiftSwitchRequestDTO? request;
+    private string targetEmployeeName = string.Empty;
+    private string targetShiftDescription = string.Empty;
+    private string originShiftDescription = string.Empty;
+
+    private long loggedInUserId;
     private bool isCreatorOfRequest;
     private bool originAcceptedDisabled = false;
     private bool targetAcceptedDisabled = false;
@@ -146,6 +149,7 @@
                 {
                     originShift = await ShiftService.GetShiftByIdAsync(request.OriginShiftId);
                     isCreatorOfRequest = request.OriginEmployeeId == loggedInUserId;
+                    await LoadAdditionalDetails();
                 }
             }
         }
@@ -154,8 +158,28 @@
             Console.WriteLine($"Error loading reply details: {ex.Message}");
             Navigation.NavigateTo("/MyReplies");
         }
+    }
 
-        StateHasChanged();
+    private async Task LoadAdditionalDetails()
+    {
+        if (reply != null)
+        {
+            var targetEmployee = await EmployeeService.GetEmployeeByIdAsync(reply.TargetEmployeeId);
+            if (targetEmployee != null)
+            {
+                targetEmployeeName = $"{targetEmployee.FirstName} {targetEmployee.LastName}";
+            }
+
+            if (targetShift != null)
+            {
+                targetShiftDescription = $"{targetShift.TypeOfShift} (Date: {targetShift.StartDateTime:g}, Location: {targetShift.Location})";
+            }
+
+            if (originShift != null)
+            {
+                originShiftDescription = $"{originShift.TypeOfShift} (Date: {originShift.StartDateTime:g}, Location: {originShift.Location})";
+            }
+        }
     }
 
     private void GoBack()
@@ -251,4 +275,5 @@
             Console.WriteLine($"Error canceling target shift switch: {ex.Message}");
         }
     }
+
 }
