@@ -1,0 +1,128 @@
+﻿@page "/ManageEmployees/{Id:long}"
+@using DTOs
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="create-account-container">
+    <h3>Edit Employee</h3>
+
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>You must be a manager to edit employee information.</p>
+        </NotAuthorized>
+
+        <Authorized Context="authorizedUser">
+            @if (employee == null)
+            {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+            }
+            else
+            {
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input maxlength="250" type="text" class="form-control" id="firstName" @bind="employee.FirstName"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input maxlength="250" type="text" class="form-control" id="lastName" @bind="employee.LastName"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="workingNumber">Working Number</label>
+                    <input maxlength="250" type="number" class="form-control" id="workingNumber" @bind="employee.WorkingNumber"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input maxlength="250" type="text" class="form-control" id="email" @bind="employee.Email"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input maxlength="250" type="password" class="form-control" id="password" @bind="employee.Password"/>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-check-label" for="isManager">Is Manager</label>
+                    <input type="checkbox" class="form-check-input" id="isManager" @bind="employee.IsManager"/>
+                </div>
+                <div class="form-group">
+
+                    <button @onclick="SaveEmployeeChanges" class="btn btn-primary mt-3">Save Changes</button>
+
+                    <button class="btn btn-danger mt-3" @onclick="DeleteEmployee">Delete Employee</button>
+
+                    <button class="btn btn-secondary mt-4" @onclick="BackToEmployees">Go Back</button>
+                </div>
+            }
+        </Authorized>
+    </AuthorizeView>
+</div>
+
+@if (showDeleteSuccessPopup)
+{
+    <div class="alert alert-success mt-3">
+        Employee successfully deleted.
+    </div>
+}
+
+@code {
+    [Parameter] public long Id { get; set; }
+    private NewEmployeeDTO employee;
+    private bool showDeleteSuccessPopup;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var existingEmployee = await EmployeeService.GetEmployeeByIdAsync(Id);
+
+        employee = new NewEmployeeDTO
+        {
+            FirstName = existingEmployee.FirstName,
+            LastName = existingEmployee.LastName,
+            WorkingNumber = existingEmployee.WorkingNumber,
+            Email = existingEmployee.Email,
+            Password = "",
+            IsManager = existingEmployee.IsManager
+        };
+        Console.WriteLine(employee.FirstName);
+        Console.WriteLine(employee.LastName);
+        Console.WriteLine(employee.WorkingNumber);
+        Console.WriteLine(employee.Email);
+        Console.WriteLine(employee.Password);
+        Console.WriteLine(employee.IsManager);
+    }
+
+    private async Task SaveEmployeeChanges()
+    {
+        Console.WriteLine("Attempting to save employee changes.");
+        Console.WriteLine(employee.FirstName);
+        Console.WriteLine(employee.LastName);
+        Console.WriteLine(employee.WorkingNumber);
+        Console.WriteLine(employee.Email);
+        Console.WriteLine(employee.Password);
+        Console.WriteLine(employee.IsManager);
+
+        await EmployeeService.UpdateEmployeeAsync(Id, employee);
+        Console.WriteLine("Employee saved.");
+        Navigation.NavigateTo("/ManageEmployees");
+    }
+
+    private async Task DeleteEmployee()
+    {
+        await EmployeeService.DeleteEmployeeAsync(Id);
+        showDeleteSuccessPopup = true;
+        StateHasChanged();
+    }
+
+    private void BackToEmployees()
+    {
+        Navigation.NavigateTo("/ManageEmployees");
+    }
+
+}

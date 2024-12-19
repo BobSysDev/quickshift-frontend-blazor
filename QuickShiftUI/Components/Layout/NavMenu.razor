@@ -1,0 +1,81 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">QuickShiftUI</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler"/>
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="CreateAccount">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Create Account
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="MyShifts">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> My Shifts
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="MyReplies">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> My Replies
+            </NavLink>
+        </div>
+        
+        @*<div class="nav-item px-3">
+            <NavLink class="nav-link" href="AllRequests">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> All Requests
+            </NavLink>
+        </div>*@
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="MyRequests">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> My Requests
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="AllSwitchRequests">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> All Switch Requests
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="SwitchShifts">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Switch Shifts
+            </NavLink>
+        </div>
+        
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="ManageShifts">
+                <span class="bi bi-pencil-square" aria-hidden="true"></span> Manage Shifts
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="ManageEmployees">
+                <span class="bi bi-person-fill" aria-hidden="true"></span> Manage Employees
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="AssignShift">
+                <span class="bi bi-clipboard" aria-hidden="true"></span> Assign Shift
+            </NavLink>
+        </div>
+        }
+
+    </nav>
+</div>

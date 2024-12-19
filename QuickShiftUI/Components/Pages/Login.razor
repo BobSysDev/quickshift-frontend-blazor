@@ -1,0 +1,92 @@
+﻿@page "/Login"
+@using System.Security.Claims
+@using DTOs
+@using QuickShiftUI.Components.Auth
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager navMgr
+
+
+<div class="login-container">
+    <AuthorizeView>
+        <NotAuthorized Context="notAuthContext">
+            <EditForm Model="authEmployee" OnValidSubmit="LoginAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary/>
+
+                <div class="form-group">
+                    <label for="working-number">Working Number:</label>
+                    <InputText maxlength="250" id="working-number" class="form-control" @bind-Value="workingNumberStr" />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <InputText maxlength="250" id="password" type="password" class="form-control" @bind-Value="authEmployee.Password" />
+                </div>
+
+                <button type="submit">Login</button>
+            </EditForm>
+
+            @if (!string.IsNullOrEmpty(errorLabel))
+            {
+            <div class="error-label">@errorLabel</div>
+            }
+        </NotAuthorized>
+
+        <Authorized>
+            <div class="welcome-message">
+                <h3>Hello, @context.User.Identity.Name</h3>
+                <button class="btn btn-secondary mt-4" @onclick="LogoutAsync">Logout</button>
+                </div>
+        </Authorized>
+    </AuthorizeView>
+</div>
+
+
+@code {
+
+    private string errorLabel;
+    private string workingNumberStr;
+    
+
+    private AuthEmployeeDTO authEmployee = new AuthEmployeeDTO();
+
+    private async Task LoginAsync()
+    {
+        
+        
+        if (!int.TryParse(workingNumberStr, out var workingNumber))
+        {
+            errorLabel = "Working Number must be a whole number.";
+            return;
+        }
+        authEmployee.WorkingNumber = workingNumber;
+        
+        
+        Console.WriteLine(authEmployee.WorkingNumber + authEmployee.Password);
+        if (authEmployee.WorkingNumber == 0 || string.IsNullOrEmpty(authEmployee.Password))
+        {
+            errorLabel = "Working Number and Password are required.";
+            return;
+        }
+
+        try
+        {
+            await ((SimpleAuthProvider)AuthProvider).Login(authEmployee.WorkingNumber, authEmployee.Password);
+            navMgr.NavigateTo("/");
+        }
+        catch (Exception e)
+        {
+            errorLabel = $"Error: {e.Message}";
+        }
+    }
+    
+    private async Task LogoutAsync(){try
+        {
+            await ((SimpleAuthProvider)AuthProvider).Logout();
+            navMgr.NavigateTo(navMgr.Uri, true);
+        }
+        catch (Exception e)
+        {
+            errorLabel = $"Error: {e.Message}";
+        }}
+
+}

@@ -1,0 +1,90 @@
+﻿@page "/ManageShifts"
+@using DTOs.Shift
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@using System.Security.Claims
+@using QuickShiftUI.Components.Auth
+@using QuickShiftUI.Services
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="my-shifts-container">
+<h3>Manage Shifts</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <p>You must be a manager to view this page.</p>
+    </NotAuthorized>
+
+    <Authorized Context="authorizedUser">
+        @if (!isManager)
+        {
+            <p>You are not authorized to manage shifts.</p>
+        }
+        else
+        {
+            <button @onclick="NavigateToCreateShift">Create New Shift</button>
+
+            @if (shifts == null)
+            {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+            }
+            else if (!shifts.Any())
+            {
+                <p class="mt-4">No shifts available.</p>
+            }
+            else
+            {
+                <ul class="list-group mt-4">
+                    @foreach (var shift in shifts)
+                    {
+                        <li class="list-group-item">
+                            <a href="#" @onclick="() => EditShift(shift.Id)" @onclick:preventDefault="true">@shift.TypeOfShift</a>
+                        </li>
+                    }
+                </ul>
+            }
+        }
+    </Authorized>
+</AuthorizeView>
+</div>
+
+@code {
+    private List<ShiftDTO> shifts;
+    private bool isManager = false;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var roleClaim = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            Console.WriteLine(roleClaim);
+            isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
+
+            if (isManager)
+            {
+                shifts = await ShiftService.GetAllShiftsAsync();
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private void EditShift(long id)
+    {
+        Navigation.NavigateTo($"/ManageShifts/{id}");
+    }
+
+    private void NavigateToCreateShift()
+    {
+        Navigation.NavigateTo("/CreateShift");
+    }
+
+}

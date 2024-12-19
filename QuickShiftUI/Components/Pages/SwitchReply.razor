@@ -1,0 +1,279 @@
+﻿@page "/SwitchReply/{Id:long}"
+@using DTOs
+@using DTOs.Shift
+@using QuickShiftUI.Services
+@inject IShiftSwitchReplyService ReplyService
+@inject IShiftService ShiftService
+@inject IShiftSwitchRequestService ShiftSwitchRequestService
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Switch Reply Details</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <p>Please log in to view this information.</p>
+    </NotAuthorized>
+
+    <Authorized Context="authorizedUser">
+        @if (reply != null && targetShift != null && originShift != null)
+        {
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Reply Details</h4>
+                </div>
+
+                <div class="card-body">
+                    <p>
+                        <b>Target Employee:</b> <span>@targetEmployeeName</span>
+                    </p>
+                    <p>
+                        <b>Target Shift:</b>
+                        <span>@targetShiftDescription</span>
+                    </p>
+                    <p>
+                        <b>Origin Shift:</b>
+                        <span>@originShiftDescription</span>
+                    </p>
+                    <p>
+                        <b>Details:</b> <span>@reply.Details</span>
+                    </p>
+                    <p>
+                        <b>Origin Accepted:</b> <span>@(reply.OriginAccepted ? "Yes" : "No")</span>
+                    </p>
+                    <p>
+                        <b>Target Accepted:</b> <span>@(reply.TargetAccepted ? "Yes" : "No")</span>
+                    </p>
+
+                    @if (!reply.OriginAccepted)
+                    {
+                        if (isCreatorOfRequest)
+                        {
+                            <button class="btn btn-success mt-4" @onclick="AcceptOriginSwitch" disabled="@originAcceptedDisabled">Accept Shift Switch</button>
+                        }
+                        else
+                        {
+                            <p class="text-warning mt-4">You must wait for the request's author to accept.</p>
+                        }
+                    }
+                    else if (!reply.TargetAccepted && reply.OriginAccepted)
+                    {
+                        if (reply.TargetEmployeeId == loggedInUserId)
+                        {
+                            <button class="btn btn-primary mt-4" @onclick="AcceptTargetSwitch" disabled="@targetAcceptedDisabled">Accept Shift Switch</button>
+                        }
+                        else
+                        {
+                            <p class="text-warning mt-4">You must wait for the reply's author to accept.</p>
+                        }
+                    }
+                    else if (reply.OriginAccepted && reply.TargetAccepted)
+                    {
+                        if (isCreatorOfRequest)
+                        {
+                            <button class="btn btn-primary mt-4" @onclick="SwitchShifts">Switch Shifts</button>
+                            <button class="btn btn-danger mt-4" @onclick="CancelOriginSwitch">Cancel Shift Switch</button>
+                        }
+                        else if (reply.TargetEmployeeId == loggedInUserId)
+                        {
+                            <button class="btn btn-danger mt-4" @onclick="CancelTargetSwitch">Cancel Shift Switch</button>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-warning mt-4">You have no business here.</p>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Loading reply details...</p>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@if (showPopup && reply != null && targetShift != null && originShift != null)
+{
+    <div>
+        <h4>Shift Switch Successful</h4>
+        <p>
+            Shift <b>@($"{targetShift.TypeOfShift} (Date: {targetShift.StartDateTime:g})")</b>
+            switched with Shift <b>@($"{originShift.TypeOfShift} (Date: {originShift.StartDateTime:g})")</b>.
+        </p>
+    </div>
+}
+
+<button class="btn btn-secondary mt-4" @onclick="GoBack">Return to My Replies</button>
+
+@code {
+    [Parameter] public long Id { get; set; }
+    private ShiftSwitchReplyDTO? reply;
+    private ShiftDTO? targetShift;
+    private ShiftDTO? originShift;
+    private ShiftSwitchRequestDTO? request;
+    private string targetEmployeeName = string.Empty;
+    private string targetShiftDescription = string.Empty;
+    private string originShiftDescription = string.Empty;
+
+    private long loggedInUserId;
+    private bool isCreatorOfRequest;
+    private bool originAcceptedDisabled = false;
+    private bool targetAcceptedDisabled = false;
+    private bool showPopup = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (long.TryParse(userIdClaim, out long userId))
+            {
+                loggedInUserId = userId;
+            }
+        }
+
+        try
+        {
+            reply = await ReplyService.GetShiftSwitchReplyByIdAsync(Id);
+            if (reply != null)
+            {
+                targetShift = await ShiftService.GetShiftByIdAsync(reply.TargetShiftId);
+                request = await ShiftSwitchRequestService.GetShiftSwitchRequestByIdAsync(reply.RequestId);
+
+                if (request != null)
+                {
+                    originShift = await ShiftService.GetShiftByIdAsync(request.OriginShiftId);
+                    isCreatorOfRequest = request.OriginEmployeeId == loggedInUserId;
+                    await LoadAdditionalDetails();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading reply details: {ex.Message}");
+            Navigation.NavigateTo("/MyReplies");
+        }
+    }
+
+    private async Task LoadAdditionalDetails()
+    {
+        if (reply != null)
+        {
+            var targetEmployee = await EmployeeService.GetEmployeeByIdAsync(reply.TargetEmployeeId);
+            if (targetEmployee != null)
+            {
+                targetEmployeeName = $"{targetEmployee.FirstName} {targetEmployee.LastName}";
+            }
+
+            if (targetShift != null)
+            {
+                targetShiftDescription = $"{targetShift.TypeOfShift} (Date: {targetShift.StartDateTime:g}, Location: {targetShift.Location})";
+            }
+
+            if (originShift != null)
+            {
+                originShiftDescription = $"{originShift.TypeOfShift} (Date: {originShift.StartDateTime:g}, Location: {originShift.Location})";
+            }
+        }
+    }
+
+    private void GoBack()
+    {
+        showPopup = false;
+        Navigation.NavigateTo("/MyReplies");
+    }
+
+    private async Task AcceptOriginSwitch()
+    {
+        try
+        {
+            if (reply != null)
+            {
+                await ReplyService.OriginAcceptShiftSwitchReplyAsync(reply.RequestId, reply.Id);
+                reply.OriginAccepted = true;
+                originAcceptedDisabled = true;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error accepting origin switch: {ex.Message}");
+        }
+    }
+
+    private async Task AcceptTargetSwitch()
+    {
+        try
+        {
+            if (reply != null)
+            {
+                await ReplyService.TargetAcceptShiftSwitchReplyAsync(reply.RequestId, reply.Id);
+                reply.TargetAccepted = true;
+                targetAcceptedDisabled = true;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error accepting target switch: {ex.Message}");
+        }
+    }
+
+    private async Task SwitchShifts()
+    {
+        try
+        {
+            if (reply != null)
+            {
+                await ReplyService.SwitchShiftsAsync(reply.RequestId, reply.Id);
+                showPopup = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error switching shifts: {ex.Message}");
+        }
+    }
+
+    private async Task CancelOriginSwitch()
+    {
+        try
+        {
+            if (reply != null)
+            {
+                await ReplyService.OriginRejectShiftSwitchReplyAsync(reply.RequestId, reply.Id);
+                reply.OriginAccepted = false;
+                reply.TargetAccepted = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error canceling shift switch: {ex.Message}");
+        }
+    }
+
+    private async Task CancelTargetSwitch()
+    {
+        try
+        {
+            if (reply != null)
+            {
+                await ReplyService.TargetRejectShiftSwitchReplyAsync(reply.RequestId, reply.Id);
+                reply.OriginAccepted = false;
+                reply.TargetAccepted = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error canceling target shift switch: {ex.Message}");
+        }
+    }
+
+}

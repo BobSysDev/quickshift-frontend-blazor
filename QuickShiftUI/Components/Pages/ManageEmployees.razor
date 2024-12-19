@@ -1,0 +1,107 @@
+﻿@page "/ManageEmployees"
+@using DTOs
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@using System.Security.Claims
+@using QuickShiftUI.Components.Auth
+@using QuickShiftUI.Services
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="my-shifts-container">
+<h3>Manage Employees</h3>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <p>You must be a manager to view this page.</p>
+    </NotAuthorized>
+
+    <Authorized Context="authorizedUser">
+        @if (!isManager)
+        {
+            <p>You are not authorized to manage employees.</p>
+        }
+        else
+        {
+            @if (employees == null)
+            {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+            }
+            else if (!employees.Any())
+            {
+                <p class="mt-4">No employees available.</p>
+            }
+            else
+            {
+                <button @onclick="CreateNewEmployee">Create A New Employee Account</button>
+
+                <ul class="list-group mt-4">
+                    @foreach (var employee in employees)
+                    {
+                        <li class="list-group-item">
+                            <a href="#" @onclick="() => EditEmployee(employee.Id)" @onclick:preventDefault="true">
+                                (@employee.WorkingNumber) @employee.FirstName @employee.LastName
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        }
+    </Authorized>
+</AuthorizeView>
+</div>
+
+@code {
+    private List<EmployeeDTO> employees;
+    private bool isManager = false;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
+            Console.WriteLine(roleClaim);
+            isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
+
+            if (isManager)
+            {
+                employees = await EmployeeService.GetAllEmployeesAsync();
+
+                employees.Sort((dto1, dto2) =>
+                {
+                    if (dto1.WorkingNumber > dto2.WorkingNumber)
+                    {
+                        return 1;
+                    }
+
+                    if (dto1.WorkingNumber == dto2.WorkingNumber)
+                    {
+                        return 0;
+                    }
+
+                    return -1;
+                });
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private void EditEmployee(long id)
+    {
+        Navigation.NavigateTo($"/ManageEmployees/{id}");
+    }
+    
+    private void CreateNewEmployee()
+    {
+        Navigation.NavigateTo($"/CreateAccount");
+    }
+
+}

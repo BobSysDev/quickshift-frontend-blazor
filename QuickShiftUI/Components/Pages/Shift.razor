@@ -1,0 +1,93 @@
+﻿@page "/MyShifts/{Id:long}"
+@using DTOs.Shift
+@using QuickShiftUI.Services
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+
+<h3>Shift details</h3>
+
+<AuthorizeView>
+    <NotAuthorized> </NotAuthorized>
+
+    <Authorized>
+        @if (displayedShift != null)
+        {
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>@displayedShift.TypeOfShift</h4>
+                </div>
+
+                <div class="card-body">
+                    <p>
+                        <b>Start time: </b><span>@displayedShift.StartDateTime</span>
+                        <br/>
+                        <b>End time: </b><span>@displayedShift.EndDateTime</span>
+                    </p>
+
+                    <p>
+                        <b>Location: </b> <span>@displayedShift.Location</span>
+                    </p>
+
+
+                    <p>
+                        <b>Status: </b> <span>@displayedShift.ShiftStatus</span>
+                    </p>
+
+                    <p>
+                        <b>Shift description:</b>
+                        <br>
+                        <span>@displayedShift.Description</span>
+                    </p>
+                </div>
+
+            </div>
+        }
+    </Authorized>
+
+
+</AuthorizeView>
+<p>
+<button class="btn-custom btn-primary-custom" @onclick="GoToCreateSwitchRequest">Create Switch Request</button>
+
+<button class="btn btn-secondary mt-4" @onclick="BackToShifts">Return</button>
+</p>
+@code {
+    [Parameter] public long Id { get; set; }
+    public ShiftDTO? displayedShift { get; set; }
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            displayedShift = await ShiftService.GetShiftByIdAsync(Id);
+        }
+        catch
+        {
+            Navigation.NavigateTo("/MyShifts");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var user = (await AuthProvider.GetAuthenticationStateAsync()).User;
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/MyShifts");
+        }
+    }
+
+    private void BackToShifts()
+    {
+        Navigation.NavigateTo("/MyShifts");
+    }
+    private void GoToCreateSwitchRequest()
+    {
+        Navigation.NavigateTo("/CreateSwitchRequest");
+    }
+}
