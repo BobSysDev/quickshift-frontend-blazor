@@ -1,0 +1,82 @@
+﻿@page "/allAnnouncements"
+@using System.Security.Claims
+@using DTOs.Announcements
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Components.Auth
+@using QuickShiftUI.Services
+@inject IAnnouncementService AnnouncementService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="announcements-container">
+    <h3>All Announcements</h3>
+
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>Please log in to view announcements.</p>
+        </NotAuthorized>
+
+        <Authorized Context="authorizedUser">
+            @if (isManager)
+            {
+                <button @onclick="RedirectToCreateAnnouncement">Create Announcement</button>
+            }
+
+            @if (announcements == null)
+            {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+            }
+            else if (!announcements.Any())
+            {
+                <p class="mt-4">No announcements available.</p>
+            }
+            else
+            {
+                <ul class="list-group mt-4">
+                    @foreach (var announcement in announcements)
+                    {
+                        <li class="list-group-item">
+                            <strong>@announcement.Title</strong><br/>
+                            <em>By @announcement.AuthorName (@announcement.AuthorWorkingNumber)</em><br/>
+                            <p>@announcement.Body</p>
+                            <small>Posted on: @announcement.DateTimeOfPosting?.ToString("g")</small>
+                        </li>
+                    }
+                </ul>
+            }
+        </Authorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    private List<AnnouncementDTO> announcements;
+    private bool isManager = false;
+
+    private void RedirectToCreateAnnouncement()
+    {
+        Navigation.NavigateTo($"/CreateAnnouncement");
+    }
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
+
+            isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
+
+            announcements = (await AnnouncementService.GetAllAnnouncementsAsync()).ToList();
+
+            StateHasChanged();
+        }
+    }
+
+}

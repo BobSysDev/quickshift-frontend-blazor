@@ -35,6 +35,8 @@
             }
             else
             {
+                <button @onclick="CreateNewEmployee">Create A New Employee Account</button>
+
                 <ul class="list-group mt-4">
                     @foreach (var employee in employees)
                     {
@@ -95,6 +97,11 @@
     private void EditEmployee(long id)
     {
         Navigation.NavigateTo($"/ManageEmployees/{id}");
+    }
+    
+    private void CreateNewEmployee()
+    {
+        Navigation.NavigateTo($"/CreateAccount");
     }
 
 }
