@@ -17,9 +17,9 @@ public class HttpShiftService : IShiftService
         return await _httpClient.GetFromJsonAsync<ShiftDTO>($"Shift/{Id}");
     }
     
-    public async Task<IEnumerable<ShiftDTO>> GetAllShiftsAsync()
+    public async Task<List<ShiftDTO>> GetAllShiftsAsync()
     {
-        return await _httpClient.GetFromJsonAsync<IEnumerable<ShiftDTO>>($"Shift");
+        return await _httpClient.GetFromJsonAsync<List<ShiftDTO>>($"Shift");
     }
     
     public async Task AddShiftAsync(NewShiftDTO shiftDto)
@@ -29,7 +29,9 @@ public class HttpShiftService : IShiftService
 
     public async Task<ShiftDTO> UpdateShiftAsync(long Id, NewShiftDTO shiftDto)
     {
-        HttpResponseMessage response = await _httpClient.PatchAsJsonAsync($"Shift/{Id}", shiftDto);
+        HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"Shift/{Id}", shiftDto);
+        Console.WriteLine("Olek penis");
+        Console.WriteLine(response.StatusCode);
         ShiftDTO responseDTO = JsonSerializer.Deserialize<ShiftDTO>(await response.Content.ReadAsStringAsync());
         return responseDTO;
     }
@@ -44,4 +46,14 @@ public class HttpShiftService : IShiftService
         return await _httpClient.GetFromJsonAsync<List<ShiftDTO>>($"Shifts/Employee/{userId}");
     }
     
+    public async Task<HttpResponseMessage> AssignShiftToEmployeeAsync(long shiftId, long employeeId)
+    {
+        return await _httpClient.PatchAsync($"/Shift/{shiftId}/Assign/{employeeId}", null);
+    }
+
+    public async Task<HttpResponseMessage> UnassignShiftFromEmployeeAsync(long shiftId, long employeeId)
+    {
+        return await _httpClient.PatchAsync($"/Shift/{shiftId}/Unassign/{employeeId}", null);
+    }
+
 }

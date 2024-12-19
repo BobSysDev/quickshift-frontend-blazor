@@ -4,56 +4,108 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager navMgr
 
-<h3>Create Account</h3>
+<div class="create-account-container">
+    <h2>Create Account</h2>
 
-<EditForm Model="newEmployee" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>You must be a manager to perform this action.</p>
+        </NotAuthorized>
+        <Authorized Context="authorizedUser">
+            @if (!isManager)
+            {
+            <p>You are not authorized to assign or unassign employees.</p>
+            }
+            else
+            {
+                <EditForm Model="newEmployee" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
 
-    <div class="mt-4">
-        <label>First Name:</label>
-        <InputText @bind-Value="newEmployee.FirstName" />
-    </div>
-    <div class="mt-4">
-        <label>Last Name:</label>
-        <InputText @bind-Value="newEmployee.LastName" />
-    </div>
-    <div class="mt-4">
-        <label>Working Number:</label>
-        <InputNumber @bind-Value="newEmployee.WorkingNumber" />
-    </div>
-    <div class="mt-4">
-        <label>Email:</label>
-        <InputText @bind-Value="newEmployee.Email" />
-    </div>
-    <div class="mt-4">
-        <label>Password:</label>
-        <InputText type="password" @bind-Value="newEmployee.Password" />
-    </div>
+                    <div class="form-group">
+                        <label for="first-name">First Name:</label>
+                        <InputText maxlength="250" id="first-name" class="form-control" @bind-Value="newEmployee.FirstName"/>
+                    </div>
 
-    @if (!string.IsNullOrEmpty(errorLabel))
-    {
-    <label class="mt-4" style="color: red"> @errorLabel </label> <br/>
-    }
-    
-    <button class="mt-4" type="submit">Register</button>
-</EditForm>
+                    <div class="form-group">
+                        <label for="last-name">Last Name:</label>
+                        <InputText maxlength="250" id="last-name" class="form-control" @bind-Value="newEmployee.LastName"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="working-number">Working Number:</label>
+                        <InputText maxlength="250" id="working-number" class="form-control" @bind-Value="workingNumberStr"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <InputText maxlength="250" id="email" class="form-control" @bind-Value="newEmployee.Email"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <InputText maxlength="250" id="password" type="password" class="form-control" @bind-Value="newEmployee.Password"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="manager">Manager:</label>
+                        <InputCheckbox id="manager" class="form-check" @bind-Value="newEmployee.IsManager"/>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorLabel))
+                    {
+                        <div class="alert">@errorLabel</div>
+                    }
+                    <p>
+                        <button class="btn btn-secondary col-md" @onclick="GoBack">Back to All Employees</button>
+                    </p>
+                    <p>
+                        <button type="submit">Register</button>
+                    </p>
+                </EditForm>
+            }
+        </Authorized>
+    </AuthorizeView>
+</div>
 
 @code {
     private NewEmployeeDTO newEmployee = new NewEmployeeDTO();
     private string errorLabel;
+    private string workingNumberStr;
+    private bool isManager = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var roleClaim = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            isManager = roleClaim == ((int)AccountRoles.Manager).ToString();
+            
+        }
+    }
 
     private async Task HandleValidSubmit()
     {
+        if (!int.TryParse(workingNumberStr, out var workingNumber))
+        {
+            errorLabel = "Working Number must be a whole number.";
+            return;
+        }
+
+        newEmployee.WorkingNumber = workingNumber;
+
+
         if (string.IsNullOrEmpty(newEmployee.FirstName) || string.IsNullOrEmpty(newEmployee.LastName) || newEmployee.WorkingNumber == 0 || string.IsNullOrEmpty(newEmployee.Email) || string.IsNullOrEmpty(newEmployee.Password))
         {
             errorLabel = "Please fill out all fields in the form.";
             return;
         }
-        
+
         try
         {
-            await ((SimpleAuthProvider)AuthProvider).Register(newEmployee.FirstName, newEmployee.LastName, newEmployee.WorkingNumber, newEmployee.Email, newEmployee.Password);
+            await ((SimpleAuthProvider)AuthProvider).RegisterSomeoneElse(newEmployee.FirstName, newEmployee.LastName, newEmployee.WorkingNumber, newEmployee.Email, newEmployee.Password, newEmployee.IsManager);
             navMgr.NavigateTo("Login");
         }
         catch (Exception e)
@@ -61,4 +113,11 @@
             errorLabel = $"Error: {e.Message}";
         }
     }
+    
+    
+    private void GoBack()
+    {
+        navMgr.NavigateTo($"/ManageEmployees");
+    }
+
 }

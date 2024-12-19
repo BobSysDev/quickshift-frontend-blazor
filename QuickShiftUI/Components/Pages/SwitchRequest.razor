@@ -1,0 +1,168 @@
+﻿@page "/MySwitchRequests/{Id:long}"
+@using DTOs
+@using DTOs.Shift
+@using QuickShiftUI.Services
+@inject IShiftSwitchRequestService RequestService
+@inject IEmployeeService EmployeeService
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<h3>Switch Request</h3>
+
+<AuthorizeView>
+    <NotAuthorized> </NotAuthorized>
+
+    <Authorized>
+        @if (request != null)
+        {
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Request Details</h4>
+                </div>
+
+                <div class="card-body">
+                    <p>
+                        <b>Origin Employee:</b> <span>@originEmployeeName</span>
+                    </p>
+                    <p>
+                        <b>Origin Shift:</b> 
+                        <span>@originShiftDescription</span>
+                    </p>
+
+                    <p>
+                        <b>Details:</b>
+                        <br />
+                        <span>@request.Details</span>
+                    </p>
+
+                    @if (request.TimeframeDtos != null && request.TimeframeDtos.Any())
+                    {
+                        <p>
+                            <b>Timeframes:</b>
+                            <ul>
+                                @foreach (var timeframe in request.TimeframeDtos)
+                                {
+                                    <li>
+                                        From @timeframe.StartDate.ToString("g") to @timeframe.EndDate.ToString("g")
+                                    </li>
+                                }
+                            </ul>
+                        </p>
+                    }
+
+                    @if (request.ReplyDtos != null && request.ReplyDtos.Any())
+                    {
+                        <p>
+                            <b>Replies:</b>
+                            <ul>
+                                @foreach (var reply in request.ReplyDtos)
+                                {
+                                    <li class="list-group-item">
+                                        <a href="#" @onclick="() => RedirectToReply(reply.Id)" @onclick:preventDefault="true">
+                                            @reply.Details
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </p>
+                    }
+                    else
+                    {
+                        <p>No replies yet.</p>
+                    }
+                </div>
+
+                <div class="card-footer">
+                    @if (request.OriginEmployeeId != loggedInUserId)
+                    {
+                        <div class="row">
+                            <button class="btn btn-primary col-md mb-4 mb-md-0" @onclick="GoToCreateReply">Create Reply</button>
+                            <button class="btn btn-secondary col-md" @onclick="GoBack">Back to All Requests</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-danger mb-4">You cannot create a reply for your own request.</p>
+                        <button class="btn btn-secondary" @onclick="GoBack">Back to All Requests</button>
+                    }
+                </div>
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] public long Id { get; set; }
+    private ShiftSwitchRequestDTO? request;
+    private string originEmployeeName = string.Empty;
+    private string originShiftDescription = string.Empty;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            request = await RequestService.GetShiftSwitchRequestByIdAsync(Id);
+            if (request != null)
+            {
+                await LoadAdditionalDetails();
+            }
+        }
+        catch
+        {
+            Navigation.NavigateTo("/allSwitchRequests");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var user = (await AuthProvider.GetAuthenticationStateAsync()).User;
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/allSwitchRequests");
+        }
+
+        var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+        if (int.TryParse(userIdClaim, out int userId))
+        {
+            loggedInUserId = userId;
+        }
+    }
+
+    private async Task LoadAdditionalDetails()
+    {
+        if (request != null)
+        {
+            var employee = await EmployeeService.GetEmployeeByIdAsync(request.OriginEmployeeId);
+            if (employee != null)
+            {
+                originEmployeeName = $"{employee.FirstName} {employee.LastName}";
+            }
+
+            var shift = await ShiftService.GetShiftByIdAsync(request.OriginShiftId);
+            if (shift != null)
+            {
+                originShiftDescription = $"{shift.StartDateTime:yyyy-MM-dd HH:mm} - {shift.TypeOfShift} @ {shift.Location}";
+            }
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/allSwitchRequests");
+    }
+
+    private void GoToCreateReply()
+    {
+        Navigation.NavigateTo($"/CreateSwitchReply/{Id}");
+    }
+
+    private void RedirectToReply(long Id)
+    {
+        Navigation.NavigateTo($"/SwitchReply/{Id}");
+    }
+}

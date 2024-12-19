@@ -1,0 +1,162 @@
+﻿@page "/allAnnouncements"
+@using System.Security.Claims
+@using DTOs.Announcements
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Components.Auth
+@using QuickShiftUI.Services
+@inject IAnnouncementService AnnouncementService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="my-shifts-container">
+    <h3>All Announcements</h3>
+
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>Please log in to view announcements.</p>
+        </NotAuthorized>
+
+        <Authorized>
+            @if (isManager)
+            {
+                <button @onclick="RedirectToCreateAnnouncement" class="btn btn-primary mb-3">Create Announcement</button>                
+                <button @onclick="Refresh" class="btn btn-primary mb-3">Refresh announcements</button>
+
+            }
+
+            @if (announcements == null)
+            {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+            }
+            else if (!announcements.Any())
+            {
+                <p class="mt-4">No announcements available.</p>
+            }
+            else
+            {
+                <div class="form-group mt-4">
+                    @foreach (var announcement in announcements)
+                    {
+                        <div class="form-control mb-3">
+                            <h5>@announcement.Title</h5>
+                            <p>
+                                <em>By @announcement.AuthorName (@announcement.AuthorWorkingNumber)</em>
+                            </p>
+                            <p>@announcement.Body</p>
+                            <small>Posted on: @announcement.DateTimeOfPosting?.ToString("g")</small>
+
+                            @if (isManager)
+                            {
+                                <div class="mt-2">
+                                    @if (announcement.AuthorId == loggedInUserId)
+                                    {
+                                        <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteAnnouncement(announcement.Id))">Delete</button>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">Only the author can delete this post.</small>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+            }
+        </Authorized>
+    </AuthorizeView>
+</div>
+
+@if (showDeleteSuccessPopup)
+{
+    <div class="alert alert-success mt-3">
+        Announcement successfully deleted.
+    </div>
+}
+Ł
+@code {
+    private List<AnnouncementDTO> announcements;
+    private bool isManager = false;
+    private int loggedInUserId;
+    private bool showDeleteSuccessPopup;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthProvider.GetAuthenticationStateAsync()).User;
+
+        var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
+        var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+
+        isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
+        if (int.TryParse(userIdClaim, out int userId))
+        {
+            loggedInUserId = userId;
+        }
+        
+
+        announcements = (await AnnouncementService.GetMostRecentAnnouncementsAsync(10)).ToList();
+        announcements.Sort((dto1, dto2) =>
+        {
+            if (dto1.DateTimeOfPosting > dto2.DateTimeOfPosting)
+            {
+                return -1;
+            }
+
+            if (dto1.DateTimeOfPosting == dto2.DateTimeOfPosting)
+            {
+                return 0;
+            }
+
+            return 1;
+        });
+        
+    }
+
+    private void RedirectToCreateAnnouncement()
+    {
+        Navigation.NavigateTo($"/CreateAnnouncement");
+    }
+
+    private async Task DeleteAnnouncement(long announcementId)
+    {
+        try
+        {
+            await AnnouncementService.DeleteAnnouncementAsync(announcementId);
+            announcements = announcements.Where(a => a.Id != announcementId).ToList();
+            showDeleteSuccessPopup = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting announcement: {ex.Message}");
+        }
+
+        StateHasChanged();
+    }
+
+
+    private void Refresh()
+    {
+        announcements.Sort((dto1, dto2) =>
+        {
+            if (dto1.DateTimeOfPosting > dto2.DateTimeOfPosting)
+            {
+                return -1;
+            }
+
+            if (dto1.DateTimeOfPosting == dto2.DateTimeOfPosting)
+            {
+                return 0;
+            }
+
+            return 1;
+        });
+        Navigation.NavigateTo("/AllAnnouncements", true);
+        StateHasChanged();
+    }
+
+}

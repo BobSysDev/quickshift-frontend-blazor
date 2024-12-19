@@ -10,13 +10,19 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddScoped<IShiftService, HttpShiftService>();
+builder.Services.AddScoped<IShiftSwitchRequestService, HttpShiftSwitchRequestService>();
+builder.Services.AddScoped<IShiftSwitchReplyService, HttpShiftSwitchReplyService>();
+builder.Services.AddScoped<IEmployeeService, HttpEmployeeService>();
+builder.Services.AddScoped<IAnnouncementService, HttpAnnouncementService>();
+
+
 builder.Services.AddScoped<AuthenticationStateProvider, SimpleAuthProvider>();
 // builder.Services.AddScoped<SimpleAuthProvider>(); 
 
 builder.Services.AddScoped(sp => new HttpClient
 { 
-    // BaseAddress = new Uri("https://quickshift.electimore.xyz")
-    BaseAddress = new Uri("http://localhost:5070")
+    BaseAddress = new Uri("https://quickshift.electimore.xyz")
+    // BaseAddress = new Uri("http://localhost:5070")
 });
 
 var app = builder.Build();

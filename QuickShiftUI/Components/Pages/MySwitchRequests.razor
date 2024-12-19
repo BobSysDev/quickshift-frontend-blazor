@@ -1,0 +1,99 @@
+﻿@page "/MyRequests"
+@using DTOs.ShiftSwitching
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+@rendermode InteractiveServer
+@inject IShiftSwitchRequestService RequestService
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@using System.Security.Claims
+@using DTOs.Shift
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="my-shifts-container">
+    <h3>My Requests</h3>
+
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>Please log in to view requests</p>
+        </NotAuthorized>
+
+        <Authorized Context="authorizedUser">
+            <button @onclick="RedirectToCreateRequest">Create Request</button>
+            
+            @if (requests == null)
+            {
+                <p class="mt-4">
+                    <em>Loading...</em>
+                </p>
+            }
+            else if (!requests.Any())
+            {
+                <p class="mt-4">No requests available.</p>
+            }
+            else
+            {
+                <ul class="list-group mt-4">
+                    @foreach (var requestDto in requests)
+                    {
+                        <li class="list-group-item">
+                            <a href="#" @onclick="() => RedirectToRequest(requestDto.Id)" @onclick:preventDefault="true">@GetShiftTypeByRequest(requestDto)</a>
+                        </li>
+                    }
+                </ul>
+            }
+        </Authorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    private List<ShiftSwitchRequestDTO> requests;
+    private Dictionary<ShiftSwitchRequestDTO, ShiftDTO> shiftsInRequests { get; set; }
+
+    private void RedirectToRequest(long Id)
+    {
+        Console.WriteLine(Id);
+        Navigation.NavigateTo($"/MySwitchRequests/{Id}");
+    }
+    
+    private void RedirectToCreateRequest()
+    {
+        Navigation.NavigateTo($"/CreateSwitchRequest/");
+    }
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+                requests = (await RequestService.GetAllShiftSwitchRequestsByEmployeeIdAsync(userId)).ToList();
+                shiftsInRequests = new Dictionary<ShiftSwitchRequestDTO, ShiftDTO>();
+                foreach (var shiftSwitchRequestDto in requests)
+                {
+                    shiftsInRequests.Add(shiftSwitchRequestDto, await ShiftService.GetShiftByIdAsync(shiftSwitchRequestDto.OriginShiftId));
+                }
+                StateHasChanged();
+            }
+        }
+    }
+    private string GetShiftTypeByRequest(ShiftSwitchRequestDTO dto)
+    {
+        shiftsInRequests.TryGetValue(dto, out var retrievedShift);
+        if (retrievedShift == null)
+        {
+            throw new Exception("Failed to retrieve shift");
+        }
+
+        return retrievedShift.TypeOfShift;
+    }
+}

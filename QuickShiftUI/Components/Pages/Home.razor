@@ -1,11 +1,25 @@
 ﻿@page "/"
-@inject NavigationManager NavMgr 
-
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager NavMgr
 <PageTitle>Home</PageTitle>
-<h1>QuickShift</h1>
-<AuthorizeView>
-    <Authorized>
-        <h3>Hello, @context.User.Identity.Name</h3>
-    </Authorized>
-    <NotAuthorized> Log in to enter the system! </NotAuthorized>
-</AuthorizeView> Here you can interact with your desired shifts <button @onclick='() => NavMgr.NavigateTo("Login")'>Go to login</button>
+<div class="home-container">
+    <h1 class="display-4">Welcome to QuickShift!</h1>
+
+    <AuthorizeView>
+        <Authorized>
+
+        <p class="lead">Manage your shifts and employees efficiently.</p>
+        </Authorized>
+        <NotAuthorized>
+        <hr class="my-4">
+        <p>Get started by logging in.</p>
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="/login" role="button">Login</a>
+        </p>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+
+

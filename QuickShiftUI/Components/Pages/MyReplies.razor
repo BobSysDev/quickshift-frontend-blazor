@@ -1,0 +1,85 @@
+﻿@page "/MyReplies"
+@using DTOs.Shift
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Services
+@rendermode InteractiveServer
+@inject IShiftSwitchReplyService ShiftSwitchReplyService
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@using System.Security.Claims
+@using DTOs
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="my-shifts-container">
+    <h3>My Replies</h3>
+
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>Please log in to view your shifts</p>
+        </NotAuthorized>
+
+        <Authorized Context="authorizedUser">
+    @if (replies == null)
+    {
+        <p class="mt-4">
+            <em>Loading...</em>
+        </p>
+    }
+    else if (!replies.Any())
+    {
+        <p class="mt-4">No replies available.</p>
+    }
+    else
+    {
+        <ul class="list-group mt-4">
+            @foreach (var shiftSwitchReplyDTO in replies)
+            {
+                <li class="list-group-item">
+                    <a href="#" @onclick="() => RedirectToReply(shiftSwitchReplyDTO.Id)" @onclick:preventDefault="true">@shiftSwitchReplyDTO.Details</a></li>
+            }
+        </ul>
+    }
+        </Authorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    private List<ShiftSwitchReplyDTO> replies;
+
+    private void RedirectToReply(long Id)
+    {
+        Console.WriteLine(Id);
+        Navigation.NavigateTo($"/SwitchReply/{Id}");
+    }
+
+    protected async Task<string> GetRepliesTitles(ShiftSwitchReplyDTO shiftReply)
+    {
+        var shift = await ShiftService.GetShiftByIdAsync(shiftReply.TargetShiftId);
+        return shift?.Description;
+    }
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+                replies = (await ShiftSwitchReplyService.GetShiftSwitchReplyByEmployeeIdAsync(userId)).ToList();
+                Console.WriteLine(replies.Any());
+                Console.WriteLine(userId);
+                StateHasChanged();
+            }
+        }
+
+        
+    }
+
+}

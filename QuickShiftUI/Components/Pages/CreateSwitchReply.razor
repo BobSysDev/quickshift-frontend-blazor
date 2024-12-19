@@ -1,0 +1,112 @@
+﻿@page "/CreateSwitchReply/{Id:long}"
+@using DTOs
+@using DTOs.Shift
+@using QuickShiftUI.Services
+@inject IShiftSwitchRequestService RequestService
+@inject IShiftSwitchReplyService ReplyService
+@inject IShiftService ShiftService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+@inject IJSRuntime JSRuntime
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h3>Create Reply for Request ID: @RequestId</h3>
+    </div>
+    <div class="card-body">
+        @if (request != null)
+        {
+            <EditForm Model="newReply" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator/>
+                <ValidationSummary/>
+
+                <div class="form-group">
+                    <label for="shiftSelect">Select Shift</label>
+                    <InputSelect @bind-Value="newReply.TargetShiftId" id="shiftSelect" class="form-control">
+                        <option value="0">-- Select a Shift --</option>
+                        @foreach (var shift in shifts)
+                        {
+                            <option value="@shift.Id">@($"{shift.StartDateTime:yyyy-MM-dd HH:mm} - {shift.TypeOfShift}")</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <h4>Reply Details</h4>
+
+                <div class="form-group">
+                    <label for="details">Details:</label>
+                    <InputTextArea maxlength="250" id="details" class="form-control" @bind-Value="newReply.Details"/>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Create Reply</button>
+                <button onclick="history.back();" class="btn btn-secondary mt-3">Cancel</button>
+            </EditForm>
+        }
+        else
+        {
+            <p>Unable to find request details.</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public long Id { get; set; }
+
+    private NewShiftSwitchReplyDTO newReply = new NewShiftSwitchReplyDTO();
+    private List<ShiftDTO> shifts;
+    private string errorLabel;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+    private int loggedInUserId;
+    private long RequestId => Id;
+    private ShiftSwitchRequestDTO? request;
+    
+    private async Task GoBack()
+    {
+        await JSRuntime.InvokeVoidAsync("history.back");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+                shifts = (await ShiftService.GetAllShiftsByUserIdAsync(userId)).ToList();
+                StateHasChanged();
+            }
+        }
+
+        request = await RequestService.GetShiftSwitchRequestByIdAsync(Id);
+
+        if (request == null || request.OriginEmployeeId == loggedInUserId)
+        {
+            Navigation.NavigateTo("allSwitchRequests");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (newReply.TargetShiftId == 0 || string.IsNullOrEmpty(newReply.Details))
+        {
+            errorLabel = "Please fill out all required fields.";
+            return;
+        }
+
+        try
+        {
+            newReply.TargetEmployeeId = loggedInUserId;
+            await ReplyService.CreateShiftSwitchReplyAsync(RequestId, newReply);
+            Navigation.NavigateTo($"/MyReplies");
+        }
+        catch (Exception ex)
+        {
+            errorLabel = $"Error creating reply: {ex.Message}";
+        }
+    }
+}

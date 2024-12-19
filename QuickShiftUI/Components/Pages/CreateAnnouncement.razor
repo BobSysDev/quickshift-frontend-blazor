@@ -1,0 +1,118 @@
+﻿@page "/CreateAnnouncement"
+@using System.Security.Claims
+@using DTOs.Announcements
+@inject IAnnouncementService AnnouncementService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+@using QuickShiftUI.Components.Auth
+@using QuickShiftUI.Services
+@inject AuthenticationStateProvider AuthProvider
+@inject IJSRuntime JSRuntime
+
+<div class="create-account-container">
+    <h3>Create Announcement</h3>
+
+    <AuthorizeView>
+        <NotAuthorized>
+            <p>You must be a manager to create announcements.</p>
+        </NotAuthorized>
+
+        <Authorized Context="authorizedUser">
+            @if (!isManager)
+            {
+                <p>You are not authorized to create announcements.</p>
+            }
+            else
+            {
+                <EditForm Model="newAnnouncement" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator/>
+                    <ValidationSummary/>
+
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <InputText maxlength="255" id="title" class="form-control" @bind-Value="newAnnouncement.Title"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="body">Body</label>
+                        <InputTextArea maxlength="255" id="body" class="form-control" @bind-Value="newAnnouncement.Body"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="DateTimeOfPosting">Date & Time of Posting</label>
+                        <input type="datetime-local" class="form-control" @bind="newAnnouncement.DateTimeOfPosting"/>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorLabel))
+                    {
+                        <div class="alert alert-danger mt-3">@errorLabel</div>
+                    }
+
+                    <button type="submit" class="btn btn-primary mt-3">Create Announcement</button>
+                    <button onclick="history.back();" class="btn btn-secondary mt-3">Cancel</button>
+                </EditForm>
+            }
+        </Authorized>
+    </AuthorizeView>
+</div>
+
+@code {
+
+    private AnnouncementDTO newAnnouncement = new AnnouncementDTO
+    {
+        DateTimeOfPosting = DateTime.Now
+    };
+
+    private bool isManager = false;
+    private string errorLabel;
+    private int loggedInUserId;
+
+    [CascadingParameter] public Task<AuthenticationState> State { get; set; }
+
+    private async Task GoBack()
+    {
+        await JSRuntime.InvokeVoidAsync("history.back");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(c => c.Type == "EmployeeId")?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                loggedInUserId = userId;
+            }
+            
+            var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
+
+            isManager = (roleClaim == ((int)AccountRoles.Manager).ToString());
+            StateHasChanged();
+        }                
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var authState = await AuthProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            newAnnouncement.AuthorId = loggedInUserId;
+            newAnnouncement.AuthorName = user.Identity.Name;
+
+            await AnnouncementService.AddAnnouncementAsync(newAnnouncement);
+
+            Navigation.NavigateTo("/AllAnnouncements");
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorLabel = $"Error creating announcement: {ex.Message}";
+        }
+    }
+
+}

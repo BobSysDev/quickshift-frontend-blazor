@@ -9,4 +9,5 @@ public class ShiftEmpoyeeDTO
     public int WorkingNumber { get; set; }
     public long Id { get; set; }
     public List<ShiftDTO> Shifts { get; set; }
+    public bool IsManager { get; set; }
 }
